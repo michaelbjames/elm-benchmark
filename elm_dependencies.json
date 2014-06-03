@@ -1,0 +1,13 @@
+{
+  "version" : "0.0.1",
+  "summary" : "Code benchmarking utility",
+  "description" : "Code snippet speed testing utility based on Elm-Test.",
+  "license" : "BSD 3-clause",
+  "repository" : "https://github.com/michaelbjames/elm-benchmark.git",
+  "exposed modules" :
+    [
+      "Perf.Run"
+    ],
+  "elm-version" : "0.12.1",
+  "dependencies" : {}
+}
