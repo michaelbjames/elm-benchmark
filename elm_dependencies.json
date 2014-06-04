@@ -4,9 +4,10 @@
   "description" : "Code snippet speed testing utility based on Elm-Test.",
   "license" : "BSD 3-clause",
   "repository" : "https://github.com/michaelbjames/elm-benchmark.git",
-  "exposed modules" :
+  "exposed-modules" :
     [
-      "Perf.Run"
+      "Perf.Benchmark",
+      "Perf.BenchExec"
     ],
   "elm-version" : "0.12.1",
   "dependencies" : {}

@@ -24,13 +24,15 @@ execute a snippet of code that require no rendering.
 Then there are ones that create a visual effect `() -> Element`.
 These require the renderer to bring the elements to life.
 
-####Tests:
-These iterations are without name and meaning, they are just arrays of
-functions waiting to be executed. So we need container for these iterations.
-Thus we will have a `Test` with a description of the computation contained
-within the form of `[iteration]`
-
 ####Results:
 We eventually want the results of our tests. We want that numeric value
-of our function. We want the time taken for a `Test` to complete, along
+of our function. We want the time taken for a `Benchmark` to complete, along
 with the information about what the test did.
+
+####Running the tests:
+#####Pure Functions:
+Pure functions are easy to test. They do not have side effects. They do not render to the screen. We can simply time the function and see how long it takes to run.
+#####Rendering Functions:
+We need a strategy to fully render the functions while also allowing us to cleanly display the results. There are two obvious strategies:
+1) Render the function in a 1px area. We squish the output to a tiny size.
+2) Render the function in a hidden area.
