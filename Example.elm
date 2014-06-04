@@ -21,4 +21,5 @@ numeric (Single name times) = times
 results : [Time]
 results = numeric <| run benchmark
 
+main : Element
 main = flow down <| map asText results

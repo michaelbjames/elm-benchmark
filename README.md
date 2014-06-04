@@ -34,5 +34,12 @@ with the information about what the test did.
 Pure functions are easy to test. They do not have side effects. They do not render to the screen. We can simply time the function and see how long it takes to run.
 #####Rendering Functions:
 We need a strategy to fully render the functions while also allowing us to cleanly display the results. There are two obvious strategies:
-1) Render the function in a 1px area. We squish the output to a tiny size.
-2) Render the function in a hidden area.
+1. Render the function in a 1px area. We squish the output to a tiny size.
+2. Render the function in a hidden area.
+
+
+###TODO:
+* Return results as they are evaluated. So we need a `Signal Result`.
+But more under the hood would be a `Signal Time`.
+* View evaluation
+* Group evaluation
