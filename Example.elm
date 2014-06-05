@@ -1,6 +1,6 @@
 module Main where
 
-import Perf.BenchExec (..)
+import Perf.Runner (..)
 import Perf.Benchmark (..)
 
 fib : Int -> Int
@@ -28,4 +28,4 @@ benchmark = visMark
 
 
 main : Signal Element
-main = run benchmark
+main = run <| view "asText" asText ["Hello","World"]
