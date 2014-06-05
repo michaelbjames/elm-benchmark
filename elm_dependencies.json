@@ -7,9 +7,9 @@
   "exposed-modules" :
     [
       "Perf.Benchmark",
-      "Perf.BenchExec"
+      "Perf.Runner"
     ],
-  "native-modules" : [ "Perf.Native.BenchExec" ],
+  "native-modules" : [ "Perf.Native.Runner" ],
   "elm-version" : "0.12.1",
   "dependencies" : {}
 }
