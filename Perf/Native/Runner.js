@@ -64,10 +64,11 @@ Elm.Native.Runner.make = function(elm) {
         var Element = Elm.Graphics.Element.make(elm);
         var Utils = ElmRuntime.use(ElmRuntime.Render.Utils);
         var functionArray = Utils.fromList(fs);
+        var render = ElmRuntime.Render.Element().render;
 
         var rendering = Signal.constant(A2(Element.spacer, 500, 500));
         A2( Signal.lift, function(a) {
-            console.log("make this go away someday:" + JSON.stringify(a));
+            console.log(a || "make this go away someday:" );
         }, rendering);
 
         function makeNextStep (model) {
@@ -83,18 +84,21 @@ Elm.Native.Runner.make = function(elm) {
         function benchRender(model) {
             console.log("benchRender");
             var step = makeNextStep(model);
+            // time and call render
+            // render(model.element);
             setTimeout(function() {
-                // elm.notify(rendering.id, step);
+                elm.notify(rendering.id, step);
             }, 1000);
             // creates a new DOM element and returns it
-            return Utils.newElement('span');
+            return render(model.element);
         }
 
         function benchUpdate(node, oldModel, newModel) {
             console.log("benchUpdate");
-            var step = makeNextStep({});
+            var step = makeNextStep(newModel);
+            // time and call update
             setTimeout(function() {
-                // elm.notify(rendering.id, step);
+                elm.notify(rendering.id, step);
             }, 1000);
         }
 
