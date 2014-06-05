@@ -24,7 +24,7 @@ Elm.Native.BenchExec.make = function(elm) {
 
         var arrfs = List.toArray(fs);
         var times = [];
-        for(f in arrfs){
+        for(f in arrfs) {
             var t1 = Date.now();
             f();
             var t2 = Date.now();
@@ -34,8 +34,9 @@ Elm.Native.BenchExec.make = function(elm) {
     }
 
     elm.addListener([],node, 'framecomplete', function nextFrame(e){
-
+        // Do something?
     });
+
     /*
     | viewTimeTrial : [() -> Element] -> Signal Element
     | 
