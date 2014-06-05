@@ -6,8 +6,30 @@ Elm.Native.BenchExec.make = function(elm) {
     if (elm.Native.BenchExec.values) return elm.Native.BenchExec.values;
 
     var Signal = Elm.Signal.make(elm);
-    var Utils = Elm.Native.Utils.make(elm);
-    var node = elm.display === ElmRuntime.Display.FULLSCREEN ? document : elm.node;
+    var Utils  = Elm.Native.Utils.make(elm);
+    var node   = elm.display === ElmRuntime.Display.FULLSCREEN ? document : elm.node;
+    var now    = (function() {
+ 
+        // Returns the number of milliseconds elapsed since either the browser navigationStart event or
+        // the UNIX epoch, depending on availability.
+        // Where the browser supports 'performance' we use that as it is more accurate (microsoeconds
+        // will be returned in the fractional part) and more reliable as it does not rely on the system time.
+        // Where 'performance' is not available, we will fall back to Date().getTime().
+
+        // http://dvolvr.davidwaterston.com/2012/06/24/javascript-accurate-timing-is-almost-here/
+         
+        var performance = window.performance || {};
+         
+        performance.now = (function() {
+            return performance.now    ||
+            performance.webkitNow     ||
+            performance.msNow         ||
+            performance.oNow          ||
+            performance.mozNow        ||
+            function() { return new Date().getTime(); };
+        })();
+        return performance.now();
+    }); 
 
 
     /*
@@ -25,17 +47,13 @@ Elm.Native.BenchExec.make = function(elm) {
         var arrfs = List.toArray(fs);
         var times = [];
         for(f in arrfs) {
-            var t1 = Date.now();
+            var t1 = now();
             f();
-            var t2 = Date.now();
+            var t2 = now();
             times.push(t2 - t1);
         }
         return List.fromArray(times)
     }
-
-    elm.addListener([],node, 'framecomplete', function nextFrame(e){
-        // Do something?
-    });
 
     /*
     | viewTimeTrial : [() -> Element] -> Signal Element
@@ -43,56 +61,92 @@ Elm.Native.BenchExec.make = function(elm) {
     | 
     */
     function viewTimeTrial(fs) {
-        var newElement = Elm.Graphics.Element.make(elm).newElement;
-        var Render = ElmRuntime.use(ElmRuntime.Render.Element);
-        var arrfs = List.toArray(fs);
-        var times = [];
+        var Element = Elm.Graphics.Element.make(elm);
+        var Utils = ElmRuntime.use(ElmRuntime.Render.Utils);
 
-        if(arrfs.length < 1) {
-            console.log("No benchmarks!");
-            // More needs to be added. We still need a constant signal
-            // that displays such a failure message
-            return;
+
+        var rendering = Signal.constant(A2(Element.spacer, 500, 500));
+        A2( Signal.lift, function() {
+            console.log("make this go away someday");
+        }, rendering);
+
+        function makeNewFrame (model) {
+           return A3(Element.newElement, 500, 400,
+                    {ctor: 'Custom',
+                    type: 'customBenchmark',
+                    render: benchRender,
+                    update: benchUpdate,
+                    model: model
+                    }); 
         }
-
-        // Make a new element from the first function in fs
-        // We then want to use our wrappers for render and update so we can
-        // make the appropriate timings and update our Signal Element
-        var first = arrfs[0](Utils.Tuple0);
-        A3(newElement, 100,100, {
-            ctor: 'Custom',
-            type: 'div',
-            render: benchRender,
-            update: benchUpdate,
-            model: {element:first, times:[], total:arrfs.length}
-        });
-
 
         function benchRender(model) {
-            var t1 = Date.now();
-
-            Render.render(model.element);
-            
-            var t2 = Date.now();
-            var timeDelta = t2 - t1;
-            model.times.push(timeDelta);
+            console.log("benchRender");
+            var frame = makeNewFrame({})
+            setTimeout(function() {
+                elm.notify(rendering.id, frame);
+            }, 1000);
+            return Utils.newElement('div');
         }
 
-        // Should I insert the next model myself here?
-        // Notify here, too?
         function benchUpdate(node, oldModel, newModel) {
-            var t1 = Date.now();
-
-            Render.update(node,oldModel,newModel);
-
-            var t2 = Date.now();
-            var timeDelta = t2 - t1;
-            newModel.times.push(timeDelta);
+            console.log("benchUpdate");
+            var frame = makeNewFrame({});
+            setTimeout(function() {
+                elm.notify(rendering.id, frame);
+            }, 1000);
         }
 
-        // We need to return a signal but we also need state over the
-        // course of the function's life.
-        return A2(Signal.foldp, step, state, input);
+        setTimeout(function() {
+            var frame = makeNewFrame({});
+            elm.notify(rendering.id, frame);
+        }, 1000);
+
+        return rendering;
+        // // notify of updates
+
+        // // Make a new element from the first function in fs
+        // // We then want to use our wrappers for render and update so we can
+        // // make the appropriate timings and update our Signal Element
+        // var first = arrfs[0](Utils.Tuple0);
+        // A3(newElement, 100,100, {
+        //     ctor: 'Custom',
+        //     type: 'div',
+        //     render: benchRender,
+        //     update: benchUpdate,
+        //     model: { element : first
+        //            , times : []
+        //            , total : arrfs.length
+        //            , completed : 0
+        //            }
+        // });
+
+
+        // function benchRender(model) {
+        //     var t1 = Date.now();
+
+        //     Render.render(model.element);
+            
+        //     var t2 = Date.now();
+        //     var timeDelta = t2 - t1;
+        //     model.times.push(timeDelta);
+        // }
+
+        // // Should I insert the next model myself here?
+        // // Notify here, too?
+        // function benchUpdate(node, oldModel, newModel) {
+        //     var t1 = Date.now();
+
+        //     Render.update(node,oldModel,newModel);
+
+        //     var t2 = Date.now();
+        //     var timeDelta = t2 - t1;
+        //     newModel.times.push(timeDelta);
+        // }
+
+        // // We need to return a signal but we also need state over the
+        // // course of the function's life.
+        // return A2(Signal.foldp, step, state, input);
     }
 
     return elm.Native.BenchExec.values = {

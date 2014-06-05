@@ -22,4 +22,4 @@ viewTimeTrials : [() -> Element] -> Signal Element
 viewTimeTrials fs = Native.BenchExec.viewTimeTrial fs
 
 
-showResults : Result -> Element
+--showResults : Result -> Element

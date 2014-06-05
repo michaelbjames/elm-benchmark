@@ -27,5 +27,5 @@ benchmark : Benchmark
 benchmark = visMark
 
 
---main : Element
+main : Signal Element
 main = run benchmark
