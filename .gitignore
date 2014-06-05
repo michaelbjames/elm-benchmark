@@ -6,4 +6,3 @@ cache/
 node_modules/
 elm_dependencies/
 docs/
-*.js

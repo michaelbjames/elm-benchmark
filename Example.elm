@@ -23,17 +23,9 @@ circleWrapper n = collage 200 200 [filled red <| circle <| toFloat n]
 visMark : Benchmark
 visMark = view "Circle" circleWrapper [10,50]
 
-
-
-
 benchmark : Benchmark
 benchmark = visMark
 
-numeric : Result -> [Time]
-numeric (Single name times) = times
 
-results : [Time]
-results = numeric <| run benchmark
-
-main : Element
-main = flow down <| map asText results
+--main : Element
+main = run benchmark
