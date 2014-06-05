@@ -12,8 +12,22 @@ fib n =  case n of
 fibWrapper : Int -> ()
 fibWrapper n = let _ = fib n in ()
 
+fibMark : Benchmark
+fibMark = logicGroup "high fibonacci" fibWrapper [20..30]
+
+
+
+circleWrapper : Int -> Element
+circleWrapper n = collage 200 200 [filled red <| circle <| toFloat n]
+
+visMark : Benchmark
+visMark = view "Circle" circleWrapper [10,50]
+
+
+
+
 benchmark : Benchmark
-benchmark = logicGroup "high fibonacci" fibWrapper [20..30]
+benchmark = visMark
 
 numeric : Result -> [Time]
 numeric (Single name times) = times
