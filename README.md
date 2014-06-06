@@ -3,6 +3,44 @@ elm-benchmark
 
 Elm code benchmarking suite
 
+###How to use this library:
+```elm
+module Main where
+
+import Perf.Runner (..)
+import Perf.Benchmark (..)
+
+fib : Int -> Int
+fib n =  case n of
+          0 -> 1
+          1 -> 1
+          _ -> fib (n-1) + fib (n-2)
+
+fibWrapper : Int -> ()
+fibWrapper n = let _ = fib n in ()
+
+fibMark : Benchmark
+fibMark = logicGroup "high fibonacci" fibWrapper [20..30]
+
+circleWrapper : Int -> Element
+circleWrapper n = collage 200 200 [filled red <| circle <| toFloat n]
+
+visMark : Benchmark
+visMark = view "Circle" circleWrapper [10..50]
+
+groupMark : Benchmark
+groupMark = Group "groupMark"
+                [ visMark
+                , fibMark
+                ]
+
+runner : Signal Result
+runner = run <| groupMark
+
+main : Signal Element
+main = lift display runner
+```
+
 
 ###Design:
 
@@ -36,10 +74,10 @@ Pure functions are easy to test. They do not have side effects. They do not rend
 We need a strategy to fully render the functions while also allowing us to cleanly display the results. There are two obvious strategies:
 1. Render the function in a 1px area. We squish the output to a tiny size.
 2. Render the function in a hidden area.
+3. Render on screen in a predefined area
+We choose #3.
 
 
 ###TODO:
-* Return results as they are evaluated. So we need a `Signal Result`.
-But more under the hood would be a `Signal Time`.
-* View evaluation
-* Group evaluation
+* The native runner returns immediately, doing all its work in the background.
+This permits several benchmarks to run simultaneously. This is a bad thing.
