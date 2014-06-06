@@ -55,14 +55,14 @@ Elm.Native.Runner.make = function(elm) {
     }
 
     /*
-    | runView : [() -> Element] -> (Signal Element, Signal Time)
+    | runView : [() -> Element] -> Signal (Element, [Time])
     | 
     | 
     */
     function runView(fs) {
         var Element = Elm.Graphics.Element.make(elm);
-        var fromList = ElmRuntime.use(ElmRuntime.Render.Utils).fromList;
-        var functionArray = fromList(fs);
+        var ListUtils = Elm.Native.List.make(elm);
+        var functionArray = ListUtils.toArray(fs);
         var Renderer = ElmRuntime.Render.Element();
         var index = 0;
         var results = [];
@@ -74,10 +74,15 @@ Elm.Native.Runner.make = function(elm) {
                 // We have one extra 0 in the front of our array
                 results.shift();
                 console.log("Results : " + JSON.stringify(results));
-                return A2 (Element.spacer, 100, 100);
+                return Utils.Tuple2( A2 (Element.spacer, 100, 100)
+                                   , ListUtils.fromArray(results)
+                                   );
             };
-            return instrumentedElement(functionArray[index++]);
-        }), A2( Element.spacer, 500, 500 ), deltas);
+            return Utils.Tuple2( instrumentedElement(functionArray[index++])
+                               , ListUtils.fromArray(results));
+        }), Utils.Tuple2( A2( Element.spacer, 500, 500 )
+                        , ListUtils.fromArray(results)
+                        ), deltas);
 
         // type Model = { thunk : () -> Element, cachedElement : Element }
         // model : Model
