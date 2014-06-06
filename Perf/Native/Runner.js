@@ -30,7 +30,7 @@ Elm.Native.Runner.make = function(elm) {
 
 
     /*
-    | runLogic : [() -> ()] -> Signal (Element, [Time])
+    | runLogic : [() -> ()] -> Signal [Time]
     | We only want to find the time it takes to execute our input function.
     | Right now there is no nice way of doing this in elm so we much look to JS
     | for help.
@@ -45,17 +45,11 @@ Elm.Native.Runner.make = function(elm) {
         var times = A3( Signal.foldp, F2( function( delta, state ) {
             if(delta >= 0) { results.push(delta) };
             if(index >= functionArray.length) {
-                return Utils.Tuple2( A2( Element.spacer, 0, 0 )
-                                   , ListUtils.fromArray(results)
-                                   );
+                return ListUtils.fromArray(results);
             }
             instrumentFunction(functionArray[index++]);
-            return Utils.Tuple2( A2( Element.spacer, 0, 0 )
-                               , ListUtils.fromArray(results)
-                               );
-        }), Utils.Tuple2( A2( Element.spacer, 0, 0 )
-                        , ListUtils.Nil
-                        ), deltas);
+            return ListUtils.fromArray(results);
+        }), ListUtils.Nil, deltas);
 
         function instrumentFunction(f) {
             var t1 = now();
@@ -68,7 +62,9 @@ Elm.Native.Runner.make = function(elm) {
 
         setTimeout(function() {
             elm.notify(deltas.id,-1);
-        },0)
+        },0);
+
+        return times;
     }
 
     /*
