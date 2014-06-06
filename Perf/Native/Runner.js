@@ -64,24 +64,62 @@ Elm.Native.Runner.make = function(elm) {
         var fromList = ElmRuntime.use(ElmRuntime.Render.Utils).fromList;
         var functionArray = fromList(fs);
         var Renderer = ElmRuntime.Render.Element();
+        var index = 0;
+        var results = [];
 
-        var rendering = Signal.constant(A2(Element.spacer, 500, 500));
-        A2( Signal.lift, function(a) {
-            console.log("Rendering:");
-            console.log(a || "make this go away someday:" );
-        }, rendering);
+        // var rendering = Signal.constant(A2(Element.spacer, 500, 500));
+        // A2( Signal.lift, function(a) {
+        //     console.log("Rendering:");
+        //     console.log(a || "make this go away someday:" );
+        // }, rendering);
 
-        var deltas = Signal.constant(0);
-        A3( Signal.foldp, F2(function(step,state) {
-            console.log("Step:");
-            console.log(step);
-            console.log("State:");
+        var delta = Signal.constant(0);
+        var rendering = A3( Signal.foldp, F2(function(delta,state) {
+            console.log("delta:");
+            console.log(delta);
+            results.push(delta);
+            console.log("state:");
             console.log(state);
-            setTimeout(function() {
-                console.log("delta notifying rendering");
-                elm.notify(rendering.id, step);
-            }, 1000);
-        }), 0, deltas);
+            if (index >= functionArray.length) {
+                console.log("Results : " + JSON.stringify(results));
+                return A2 (Element.spacer, 100, 100);
+            };
+            return instrumentedElement(functionArray[index++]);
+        }), A2( Element.spacer, 500, 500 ), delta);
+
+        // type Model = { thunk : () -> Element, cachedElement : Element }
+        // model : Model
+        // render : Model -> DOM
+        // update : DOM -> Model -> Model -> ()
+
+        function instrumentedElement(thunk) {
+           return A3(Element.newElement, 500, 400,
+                    { ctor: 'Custom'
+                    , type: 'customBenchmark'
+                    , render: benchRender
+                    , update: benchUpdate
+                    , model: thunk
+                    }); 
+        }
+
+        function benchRender(thunk) {
+            console.log("benchRender");
+            var t1 = now();
+            var newRendering = Renderer.render(thunk(Utils.Tuple0));
+            var t2 = now();
+            setTimeout(function() { elm.notify(delta.id, t2 - t1); }, 1000);
+            return newRendering
+        }
+
+        function benchUpdate(node, oldThunk, newThunk) {
+            console.log("benchUpdate");
+            var t1 = now();
+            var oldModel = oldThunk(Utils.Tuple0);
+            var newModel = newThunk(Utils.Tuple0)
+            var newRendering = Renderer.update(node, oldModel, newModel);
+            var t2 = now();
+            setTimeout(function() { elm.notify(delta.id, t2 - t1); }, 1000);
+        }
 
 
         // var test = Signal.constant(Utils.Tuple2(
@@ -105,52 +143,24 @@ Elm.Native.Runner.make = function(elm) {
        //          // elm.notify(rendering.id, step);
        //      }, 1000);
        //  }), 0, test);
-
-        function makeNextStep (model) {
-           return A3(Element.newElement, 500, 400,
-                    {ctor: 'Custom',
-                    type: 'customBenchmark',
-                    render: benchRender,
-                    update: benchUpdate,
-                    model: model
-                    }); 
-        }
-
-        function benchRender(model) {
-            console.log("benchRender");
-            var step = makeNextStep(model);
-            // time and call render
-            // render(model.element);
-            setTimeout(function() {
-                elm.notify(rendering.id, step);
-                elm.notify(deltas.id,step);
-                // elm.notify(test.id,step);
-            }, 1000);
-            // creates a new DOM element and returns it
-            return Renderer.render(model(Utils.Tuple0));
-        }
-
-        function benchUpdate(node, oldModel, newModel) {
-            console.log("benchUpdate");
-            var step = makeNextStep(newModel);
-            // time and call update
-            setTimeout(function() {
-                elm.notify(rendering.id, step);
-                elm.notify(deltas.id,step);
-                // elm.notify(test.id,step);
-            }, 1000);
-        }
+        // function cycle() {
+        //     console.log("setTimeout");
+        //     var step = makeNextStep(functionArray[0]);
+        //     elm.notify(rendering.id, step);
+        //     elm.notify(deltas.id,step);
+        //     setTimeout(cycle, 1000);
+        //     // elm.notify(test.id,step);
+        // }
+        // cycle();
 
         setTimeout(function() {
-            console.log("setTimeout");
-            var step = makeNextStep(functionArray[0]);
-            elm.notify(rendering.id, step);
-            elm.notify(deltas.id,step);
-            // elm.notify(test.id,step);
-        }, 1000);
+            elm.notify(delta.id,0);
+        },1000);
 
-        return Utils.Tuple2(rendering, deltas);
+        return rendering;
     }
+
+
 
     return elm.Native.Runner.values =
         { runLogic : runLogic

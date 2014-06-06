@@ -23,13 +23,11 @@ import Perf.Benchmark (..)
 --visMark : Benchmark
 --visMark = view "Circle" circleWrapper [10,50]
 
-benchmark : (Signal Element, Signal Time)
-benchmark = run <| view "asText" asText ["Hello","World"]
+--benchmark : (Signal Element, Signal Time)
+--benchmark = run <| view "asText" asText ["Hello","World"]
 
-showBoth : Element -> Time -> Element
-showBoth element time = asText time `above` element
+--showBoth : Element -> Time -> Element
+--showBoth element time = asText time `above` element
 
 main : Signal Element
-main = case benchmark of
-  (selement, stime) -> lift2 showBoth selement stime
-  _ -> lift (\_ -> asText "The impossible has happened") (constant 0)
+main = run <| view "asText" asText ["Hello","World"]
