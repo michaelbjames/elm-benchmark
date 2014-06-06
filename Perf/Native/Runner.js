@@ -71,6 +71,8 @@ Elm.Native.Runner.make = function(elm) {
         var rendering = A3( Signal.foldp, F2(function(delta,state) {
             results.push(delta);
             if (index >= functionArray.length) {
+                // We have one extra 0 in the front of our array
+                results.shift();
                 console.log("Results : " + JSON.stringify(results));
                 return A2 (Element.spacer, 100, 100);
             };
