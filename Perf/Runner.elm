@@ -7,7 +7,7 @@ data Result = Single String [Time]
             | Report String { total : Time,
                               individuals : [Result] }
 
-run : Benchmark -> Signal (Element,Time)
+run : Benchmark -> (Signal Element, Signal Time)
 run bm =
   case bm of
     --Logic name fs -> lift showResults runLogic fs
@@ -18,7 +18,7 @@ run bm =
 --runLogic : [()->()] -> Signal Result
 --runLogic fs = Native.Runner.runLogic fs
 
-runView : [() -> Element] -> Signal (Element,Time)
+runView : [() -> Element] -> (Signal Element, Signal Time)
 runView fs = Native.Runner.runView fs
 
 

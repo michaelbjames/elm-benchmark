@@ -7,7 +7,6 @@ Elm.Native.Runner.make = function(elm) {
 
     var Signal = Elm.Signal.make(elm);
     var Utils  = Elm.Native.Utils.make(elm);
-    var node   = elm.display === ElmRuntime.Display.FULLSCREEN ? document : elm.node;
     var now    = (function() {
  
         // Returns the number of milliseconds elapsed since either the browser navigationStart event or
@@ -56,14 +55,14 @@ Elm.Native.Runner.make = function(elm) {
     }
 
     /*
-    | runView : [() -> Element] -> Signal (Element, Time)
+    | runView : [() -> Element] -> (Signal Element, Signal Time)
     | 
     | 
     */
     function runView(fs) {
         var Element = Elm.Graphics.Element.make(elm);
-        var Utils = ElmRuntime.use(ElmRuntime.Render.Utils);
-        var functionArray = Utils.fromList(fs);
+        var fromList = ElmRuntime.use(ElmRuntime.Render.Utils).fromList;
+        var functionArray = fromList(fs);
         var Renderer = ElmRuntime.Render.Element();
 
         var rendering = Signal.constant(A2(Element.spacer, 500, 500));
@@ -78,12 +77,34 @@ Elm.Native.Runner.make = function(elm) {
             console.log(step);
             console.log("State:");
             console.log(state);
-            step
             setTimeout(function() {
                 console.log("delta notifying rendering");
                 elm.notify(rendering.id, step);
             }, 1000);
         }), 0, deltas);
+
+
+        // var test = Signal.constant(Utils.Tuple2(
+        //                            A2( Element.spacer, 500, 500)
+        //                            , 0));
+
+        // A2( Signal.lift, function(a) {
+        //     console.log("Lift Element");
+        //     console.log(a);
+        //     return a._0;
+        // }, test);
+
+       // A3( Signal.foldp, F2( function(step,state) {
+       //      console.log("Step:");
+       //      console.log(step);
+       //      console.log("State:");
+       //      console.log(state);
+       //      return state + 1;
+       //      setTimeout(function() {
+       //          console.log("delta notifying rendering");
+       //          // elm.notify(rendering.id, step);
+       //      }, 1000);
+       //  }), 0, test);
 
         function makeNextStep (model) {
            return A3(Element.newElement, 500, 400,
@@ -103,9 +124,10 @@ Elm.Native.Runner.make = function(elm) {
             setTimeout(function() {
                 elm.notify(rendering.id, step);
                 elm.notify(deltas.id,step);
+                // elm.notify(test.id,step);
             }, 1000);
             // creates a new DOM element and returns it
-            return Renderer.render(model(Utils._Tuple0));
+            return Renderer.render(model(Utils.Tuple0));
         }
 
         function benchUpdate(node, oldModel, newModel) {
@@ -115,17 +137,19 @@ Elm.Native.Runner.make = function(elm) {
             setTimeout(function() {
                 elm.notify(rendering.id, step);
                 elm.notify(deltas.id,step);
+                // elm.notify(test.id,step);
             }, 1000);
         }
 
         setTimeout(function() {
             console.log("setTimeout");
             var step = makeNextStep(functionArray[0]);
-            // elm.notify(rendering.id, step);
+            elm.notify(rendering.id, step);
             elm.notify(deltas.id,step);
+            // elm.notify(test.id,step);
         }, 1000);
 
-        return deltas;
+        return Utils.Tuple2(rendering, deltas);
     }
 
     return elm.Native.Runner.values =
