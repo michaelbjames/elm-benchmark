@@ -10,13 +10,13 @@ data Result = Single String [Time]
 run : Benchmark -> Signal (Element,[Time])
 run bm =
   case bm of
-    --Logic name fs -> lift showResults runLogic fs
+    Logic name fs -> runLogic fs
     View name fs -> runView fs
     --Group name bms ->
 
 
---runLogic : [()->()] -> Signal Result
---runLogic fs = Native.Runner.runLogic fs
+runLogic : [()->()] -> Signal (Element,[Time])
+runLogic fs = Native.Runner.runLogic fs
 
 runView : [() -> Element] -> Signal (Element,[Time])
 runView fs = Native.Runner.runView fs

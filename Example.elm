@@ -3,17 +3,17 @@ module Main where
 import Perf.Runner (..)
 import Perf.Benchmark (..)
 
---fib : Int -> Int
---fib n =  case n of
---          0 -> 1
---          1 -> 1
---          _ -> fib (n-1) + fib (n-2)
+fib : Int -> Int
+fib n =  case n of
+          0 -> 1
+          1 -> 1
+          _ -> fib (n-1) + fib (n-2)
 
---fibWrapper : Int -> ()
---fibWrapper n = let _ = fib n in ()
+fibWrapper : Int -> ()
+fibWrapper n = let _ = fib n in ()
 
---fibMark : Benchmark
---fibMark = logicGroup "high fibonacci" fibWrapper [20..30]
+fibMark : Benchmark
+fibMark = logicGroup "high fibonacci" fibWrapper [20..30]
 
 
 
@@ -27,7 +27,7 @@ visSimple : Benchmark
 visSimple = view "asText" asText ["Hello","World"]
 
 runner : Signal (Element, [Time])
-runner = run <| visMark
+runner = run <| fibMark
 
 showBoth : (Element, [Time]) -> Element
 showBoth (element, times) = asText times `above` element

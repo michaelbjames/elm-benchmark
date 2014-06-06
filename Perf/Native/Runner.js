@@ -8,6 +8,7 @@ Elm.Native.Runner.make = function(elm) {
     var Signal    = Elm.Signal.make(elm);
     var Utils     = Elm.Native.Utils.make(elm);
     var ListUtils = Elm.Native.List.make(elm);
+    var Element   = Elm.Graphics.Element.make(elm);
     var now       = (function() {
         // Returns the number of milliseconds elapsed since either the browser navigationStart event or
         // the UNIX epoch, depending on availability.
@@ -29,7 +30,7 @@ Elm.Native.Runner.make = function(elm) {
 
 
     /*
-    | runLogic : [() -> ()] -> Signal [Time]
+    | runLogic : [() -> ()] -> Signal (Element, [Time])
     | We only want to find the time it takes to execute our input function.
     | Right now there is no nice way of doing this in elm so we much look to JS
     | for help.
@@ -37,15 +38,37 @@ Elm.Native.Runner.make = function(elm) {
     function runLogic(fs) {
 
         var functionArray = ListUtils.toArray(fs);
-        var times = [];
+        var index = 0;
+        var results = [];
 
-        for(f in arrfs) {
+        var deltas = Signal.constant(-1);
+        var times = A3( Signal.foldp, F2( function( delta, state ) {
+            if(delta >= 0) { results.push(delta) };
+            if(index >= functionArray.length) {
+                return Utils.Tuple2( A2( Element.spacer, 0, 0 )
+                                   , ListUtils.fromArray(results)
+                                   );
+            }
+            instrumentFunction(functionArray[index++]);
+            return Utils.Tuple2( A2( Element.spacer, 0, 0 )
+                               , ListUtils.fromArray(results)
+                               );
+        }), Utils.Tuple2( A2( Element.spacer, 0, 0 )
+                        , ListUtils.Nil
+                        ), deltas);
+
+        function instrumentFunction(f) {
             var t1 = now();
-            f();
+            f(Utils.Tuple0);
             var t2 = now();
-            times.push(t2 - t1);
-        }
-        return List.fromArray(times)
+            setTimeout(function() {
+                elm.notify(deltas.id, t2 - t1);
+            },0);
+        };
+
+        setTimeout(function() {
+            elm.notify(deltas.id,-1);
+        },0)
     }
 
     /*
@@ -62,7 +85,6 @@ Elm.Native.Runner.make = function(elm) {
     |       * How should we decide how much screen space to allocate to render?
     */
     function runView(fs) {
-        var Element = Elm.Graphics.Element.make(elm);
         var functionArray = ListUtils.toArray(fs);
         var Renderer = ElmRuntime.Render.Element();
         var index = 0;
@@ -72,13 +94,12 @@ Elm.Native.Runner.make = function(elm) {
         // This foldp is what keeps the cycle going. When it gets a new
         // timeDelta, it sets up another wrapped element to be given back
         // to Elm and timed (which will notify this foldp again)
-        var deltas = Signal.constant(0);
+        var deltas = Signal.constant(-1);
         var rendering = A3( Signal.foldp, F2(function(delta,state) {
-            results.push(delta);
+            if(delta >= 0) { results.push(delta) };
             if (index >= functionArray.length) {
                 // We have one extra 0 in the front of our array
-                results.shift();
-                return Utils.Tuple2( A2 (Element.spacer, 0, 0)
+                return Utils.Tuple2( A2( Element.spacer, 0, 0 )
                                    , ListUtils.fromArray(results)
                                    );
             };
@@ -121,7 +142,7 @@ Elm.Native.Runner.make = function(elm) {
         }
 
         setTimeout(function() {
-            elm.notify(deltas.id,0);
+            elm.notify(deltas.id,-1);
         },0);
 
         return rendering;
