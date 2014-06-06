@@ -67,25 +67,15 @@ Elm.Native.Runner.make = function(elm) {
         var index = 0;
         var results = [];
 
-        // var rendering = Signal.constant(A2(Element.spacer, 500, 500));
-        // A2( Signal.lift, function(a) {
-        //     console.log("Rendering:");
-        //     console.log(a || "make this go away someday:" );
-        // }, rendering);
-
-        var delta = Signal.constant(0);
+        var deltas = Signal.constant(0);
         var rendering = A3( Signal.foldp, F2(function(delta,state) {
-            console.log("delta:");
-            console.log(delta);
             results.push(delta);
-            console.log("state:");
-            console.log(state);
             if (index >= functionArray.length) {
                 console.log("Results : " + JSON.stringify(results));
                 return A2 (Element.spacer, 100, 100);
             };
             return instrumentedElement(functionArray[index++]);
-        }), A2( Element.spacer, 500, 500 ), delta);
+        }), A2( Element.spacer, 500, 500 ), deltas);
 
         // type Model = { thunk : () -> Element, cachedElement : Element }
         // model : Model
@@ -103,59 +93,25 @@ Elm.Native.Runner.make = function(elm) {
         }
 
         function benchRender(thunk) {
-            console.log("benchRender");
-            var t1 = now();
+            var t1           = now();
             var newRendering = Renderer.render(thunk(Utils.Tuple0));
-            var t2 = now();
-            setTimeout(function() { elm.notify(delta.id, t2 - t1); }, 1000);
+            var t2           = now();
+            setTimeout(function() { elm.notify(deltas.id, t2 - t1); }, 0);
             return newRendering
         }
 
         function benchUpdate(node, oldThunk, newThunk) {
-            console.log("benchUpdate");
-            var t1 = now();
-            var oldModel = oldThunk(Utils.Tuple0);
-            var newModel = newThunk(Utils.Tuple0)
+            var t1           = now();
+            var oldModel     = oldThunk(Utils.Tuple0);
+            var newModel     = newThunk(Utils.Tuple0)
             var newRendering = Renderer.update(node, oldModel, newModel);
-            var t2 = now();
-            setTimeout(function() { elm.notify(delta.id, t2 - t1); }, 1000);
+            var t2           = now();
+            setTimeout(function() { elm.notify(deltas.id, t2 - t1); }, 0);
         }
 
-
-        // var test = Signal.constant(Utils.Tuple2(
-        //                            A2( Element.spacer, 500, 500)
-        //                            , 0));
-
-        // A2( Signal.lift, function(a) {
-        //     console.log("Lift Element");
-        //     console.log(a);
-        //     return a._0;
-        // }, test);
-
-       // A3( Signal.foldp, F2( function(step,state) {
-       //      console.log("Step:");
-       //      console.log(step);
-       //      console.log("State:");
-       //      console.log(state);
-       //      return state + 1;
-       //      setTimeout(function() {
-       //          console.log("delta notifying rendering");
-       //          // elm.notify(rendering.id, step);
-       //      }, 1000);
-       //  }), 0, test);
-        // function cycle() {
-        //     console.log("setTimeout");
-        //     var step = makeNextStep(functionArray[0]);
-        //     elm.notify(rendering.id, step);
-        //     elm.notify(deltas.id,step);
-        //     setTimeout(cycle, 1000);
-        //     // elm.notify(test.id,step);
-        // }
-        // cycle();
-
         setTimeout(function() {
-            elm.notify(delta.id,0);
-        },1000);
+            elm.notify(deltas.id,0);
+        },0);
 
         return rendering;
     }

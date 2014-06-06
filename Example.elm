@@ -17,11 +17,11 @@ import Perf.Benchmark (..)
 
 
 
---circleWrapper : Int -> Element
---circleWrapper n = collage 200 200 [filled red <| circle <| toFloat n]
+circleWrapper : Int -> Element
+circleWrapper n = collage 200 200 [filled red <| circle <| toFloat n]
 
---visMark : Benchmark
---visMark = view "Circle" circleWrapper [10,50]
+visMark : Benchmark
+visMark = view "Circle" circleWrapper [10..50]
 
 --benchmark : (Signal Element, Signal Time)
 --benchmark = run <| view "asText" asText ["Hello","World"]
@@ -29,5 +29,8 @@ import Perf.Benchmark (..)
 --showBoth : Element -> Time -> Element
 --showBoth element time = asText time `above` element
 
+visSimple : Benchmark
+visSimple = view "asText" asText ["Hello","World"]
+
 main : Signal Element
-main = run <| view "asText" asText ["Hello","World"]
+main = run visSimple
