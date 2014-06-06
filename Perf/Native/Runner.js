@@ -56,7 +56,7 @@ Elm.Native.Runner.make = function(elm) {
     }
 
     /*
-    | runView : [() -> Element] -> Signal Element
+    | runView : [() -> Element] -> Signal (Element, Time)
     | 
     | 
     */
@@ -64,12 +64,26 @@ Elm.Native.Runner.make = function(elm) {
         var Element = Elm.Graphics.Element.make(elm);
         var Utils = ElmRuntime.use(ElmRuntime.Render.Utils);
         var functionArray = Utils.fromList(fs);
-        var render = ElmRuntime.Render.Element().render;
+        var Renderer = ElmRuntime.Render.Element();
 
         var rendering = Signal.constant(A2(Element.spacer, 500, 500));
         A2( Signal.lift, function(a) {
+            console.log("Rendering:");
             console.log(a || "make this go away someday:" );
         }, rendering);
+
+        var deltas = Signal.constant(0);
+        A3( Signal.foldp, F2(function(step,state) {
+            console.log("Step:");
+            console.log(step);
+            console.log("State:");
+            console.log(state);
+            step
+            setTimeout(function() {
+                console.log("delta notifying rendering");
+                elm.notify(rendering.id, step);
+            }, 1000);
+        }), 0, deltas);
 
         function makeNextStep (model) {
            return A3(Element.newElement, 500, 400,
@@ -88,9 +102,10 @@ Elm.Native.Runner.make = function(elm) {
             // render(model.element);
             setTimeout(function() {
                 elm.notify(rendering.id, step);
+                elm.notify(deltas.id,step);
             }, 1000);
             // creates a new DOM element and returns it
-            return render(model.element);
+            return Renderer.render(model(Utils._Tuple0));
         }
 
         function benchUpdate(node, oldModel, newModel) {
@@ -99,15 +114,18 @@ Elm.Native.Runner.make = function(elm) {
             // time and call update
             setTimeout(function() {
                 elm.notify(rendering.id, step);
+                elm.notify(deltas.id,step);
             }, 1000);
         }
 
         setTimeout(function() {
-            var step = makeNextStep({element : functionArray[0](Utils._Tuple0)});
-            elm.notify(rendering.id, step);
+            console.log("setTimeout");
+            var step = makeNextStep(functionArray[0]);
+            // elm.notify(rendering.id, step);
+            elm.notify(deltas.id,step);
         }, 1000);
 
-        return rendering;
+        return deltas;
     }
 
     return elm.Native.Runner.values =

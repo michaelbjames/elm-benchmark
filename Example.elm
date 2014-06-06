@@ -23,9 +23,11 @@ circleWrapper n = collage 200 200 [filled red <| circle <| toFloat n]
 visMark : Benchmark
 visMark = view "Circle" circleWrapper [10,50]
 
-benchmark : Benchmark
-benchmark = visMark
+benchmark : Signal (Element, Time)
+benchmark = run <| view "asText" asText ["Hello","World"]
 
+showBoth : (Element,Time) -> Element
+showBoth (element, time) = asText time `above` element
 
 main : Signal Element
-main = run <| view "asText" asText ["Hello","World"]
+main = lift showBoth benchmark
