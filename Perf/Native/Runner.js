@@ -34,6 +34,9 @@ Elm.Native.Runner.make = function(elm) {
     | We only want to find the time it takes to execute our input function.
     | Right now there is no nice way of doing this in elm so we much look to JS
     | for help.
+    | To remain responsive we use timeouts that call the foldp to begin running
+    | the next function. We can return and build up a growing list of how long
+    | these functions take.
     */
     function runLogic(fs) {
 

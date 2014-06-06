@@ -13,7 +13,7 @@ fibWrapper : Int -> ()
 fibWrapper n = let _ = fib n in ()
 
 fibMark : Benchmark
-fibMark = logicGroup "high fibonacci" fibWrapper [20..30]
+fibMark = logicGroup "high fibonacci" fibWrapper [35..40]
 
 
 
@@ -26,11 +26,19 @@ visMark = view "Circle" circleWrapper [10..50]
 visSimple : Benchmark
 visSimple = view "asText" asText ["Hello","World"]
 
-runner : Signal (Element, [Time])
-runner = run <| fibMark
+groupMark : Benchmark
+groupMark = Group "groupMark"
+                [ visMark
+                , visMark
+                ]
+
+runner : Signal Result
+runner = run <| groupMark
 
 showBoth : (Element, [Time]) -> Element
 showBoth (element, times) = asText times `above` element
 
+
+
 main : Signal Element
-main = lift showBoth runner
+main = lift display runner

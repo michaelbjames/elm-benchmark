@@ -3,17 +3,33 @@ module Perf.Runner where
 import Perf.Benchmark (..)
 import Native.Runner
 
-data Result = Single String [Time]
-            | Report String { total : Time,
-                              individuals : [Result] }
+data Result = Running String (Element,[Time])
+            | Single String [Time]
+            | Report String [Result]
 
-run : Benchmark -> Signal (Element,[Time])
+display : Result -> Element
+display result = case result of
+  Running name (element,times) ->    asText name `above` element `above` (asText times)
+  Single name times ->   asText name `above` (asText times)
+  Report name results -> foldr (\acc base -> base `above` (display acc)) (asText name) results
+
+run : Benchmark -> Signal Result
 run bm =
   case bm of
-    Logic name fs -> lift (\x -> (spacer 0 0, x)) <| runLogic fs
-    View name fs -> runView fs
-    --Group name bms ->
+    Logic name fs -> let totalFunctions = length fs
+                     in lift (benchmarkComplete name totalFunctions)
+                        (lift (\x -> (spacer 0 0, x)) (runLogic fs))
+    View name fs ->
+      let totalFunctions = length fs
+      in lift (benchmarkComplete name totalFunctions) (runView fs)
+    Group name bms -> lift (Report name) (combine (map run bms))
 
+
+benchmarkComplete : String -> Int -> (Element, [Time]) -> Result
+benchmarkComplete name totalFunctions (element, times) =
+  if totalFunctions == (length times)
+  then Single name times
+  else Running name (element, times)
 
 runLogic : [()->()] -> Signal [Time]
 runLogic fs = Native.Runner.runLogic fs
