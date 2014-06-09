@@ -9,36 +9,43 @@ data Result = Running String (Element,[Time])
 
 display : Result -> Element
 display result = case result of
-  Running name (element,times) -> asText name `above` element `above` (asText times)
-  Single name times ->   asText name `above` (asText times)
-  Report name results -> foldr (\acc base -> base `above` (display acc)) (asText name) results
+    Running name (element,times) ->
+                         asText name `above` element `above` (asText times)
+    Single name times -> asText name `above` (asText times)
+    Report name results ->
+        foldr (\result baseElement -> baseElement `above` (display result))
+            (asText name) results
 
 run : Benchmark -> Signal Result
-run bm =
-  case bm of
+run bm = case bm of
     Logic name fs -> let totalFunctions = length fs
-                     in lift (benchmarkComplete name totalFunctions)
+                     in lift (status name totalFunctions)
                         (lift (\x -> (spacer 0 0, x)) (runLogic fs))
     View name fs ->
       let totalFunctions = length fs
-      in lift (benchmarkComplete name totalFunctions) (runView fs)
+      in lift (status name totalFunctions) (runView fs)
     Group name bms -> lift (Report name) (combine (map run bms))
     {-| We need `run` to wait for each element in bms to complete
         before going on to the next benchmark
     -}
 
+{-| Get the status of a benchmark. As it is lifted, it will change
+    from a running test to a completed single benchmark.
+    Groups of benchmarks are broken down to individual tests and the status
+    is displayed from there
 
-benchmarkComplete : String -> Int -> (Element, [Time]) -> Result
-benchmarkComplete name totalFunctions (element, times) =
-  if totalFunctions == (length times)
-  then Single name times
-  else Running name (element, times)
+    Question: Do we need to pass a string in? So therefore, we would return
+    functions String -> Result. This would get lifted, so we would get
+    Signal (String -> Result). Does Elm have a way to apply a value to this?
+-}
+status : String -> Int -> (Element, [Time]) -> Result
+status name totalFunctions (element, times) =
+    if totalFunctions == (length times)
+    then Single name times
+    else Running name (element, times)
 
 runLogic : [()->()] -> Signal [Time]
 runLogic fs = Native.Runner.runLogic fs
 
 runView : [() -> Element] -> Signal (Element,[Time])
 runView fs = Native.Runner.runView fs
-
-
---showResults : Result -> Element
