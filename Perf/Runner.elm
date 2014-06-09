@@ -27,6 +27,8 @@ run bm = case bm of
     Group name bms -> lift (Report name) (combine (map run bms))
     {-| We need `run` to wait for each element in bms to complete
         before going on to the next benchmark
+        elm currently only has the capacity to busy loop, waiting
+        we need Javascript to tell us when to continue
     -}
 
 {-| Get the status of a benchmark. As it is lifted, it will change

@@ -50,11 +50,11 @@ Elm.Native.Runner.make = function(elm) {
             if(index >= functionArray.length) {
                 return ListUtils.fromArray(results);
             }
-            instrumentFunction(functionArray[index++]);
+            timeFunction(functionArray[index++]);
             return ListUtils.fromArray(results);
         }), ListUtils.Nil, deltas);
 
-        function instrumentFunction(f) {
+        function timeFunction(f) {
             var t1 = now();
             f(Utils.Tuple0);
             var t2 = now();
