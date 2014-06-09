@@ -9,7 +9,7 @@ data Result = Running String (Element,[Time])
 
 display : Result -> Element
 display result = case result of
-  Running name (element,times) ->    asText name `above` element `above` (asText times)
+  Running name (element,times) -> asText name `above` element `above` (asText times)
   Single name times ->   asText name `above` (asText times)
   Report name results -> foldr (\acc base -> base `above` (display acc)) (asText name) results
 
@@ -23,6 +23,9 @@ run bm =
       let totalFunctions = length fs
       in lift (benchmarkComplete name totalFunctions) (runView fs)
     Group name bms -> lift (Report name) (combine (map run bms))
+    {-| We need `run` to wait for each element in bms to complete
+        before going on to the next benchmark
+    -}
 
 
 benchmarkComplete : String -> Int -> (Element, [Time]) -> Result
