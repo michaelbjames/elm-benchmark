@@ -15,16 +15,20 @@ fibWrapper n = let _ = fib n in ()
 fibMark : Benchmark
 fibMark = logicGroup "high fibonacci" fibWrapper [20..30]
 
-circleWrapper : Int -> Element
-circleWrapper n = collage 200 200 [filled red <| circle <| toFloat n]
+circleWrapper : Color -> Int -> Element
+circleWrapper col n = collage 200 200 [filled col <| circle <| toFloat n]
 
 visMark : Benchmark
-visMark = view "Circle" circleWrapper [10..50]
+visMark = view "Circle" (circleWrapper red) [10..50]
+
+staticMark : Benchmark
+staticMark = staticView "Blue Circle" (circleWrapper blue 100)
 
 groupMark : Benchmark
 groupMark = Group "groupMark"
                 [ visMark
                 , fibMark
+                , staticMark
                 ]
 
 runner : Signal Result
