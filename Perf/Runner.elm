@@ -10,11 +10,11 @@ data Result = Running String (Element,[Time])
 display : Result -> Element
 display result = case result of
     Running name (element,times) ->
-                         asText name `above` element `above` (asText times)
-    Single name times -> asText name `above` (asText times)
-    Report name results ->
-        foldr (\result baseElement -> baseElement `above` (display result))
-            (asText name) results
+                           asText name `above` element `above` (asText times)
+    Single name times ->   asText name `above` (asText times)
+    Report name results -> asText name `above`
+        foldr (\result baseElement -> baseElement `below` (display result))
+            (spacer 0 0) results
 
 run : Benchmark -> Signal Result
 run bm = case bm of
