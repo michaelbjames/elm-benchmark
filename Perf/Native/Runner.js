@@ -147,8 +147,6 @@ Elm.Native.Runner.make = function(elm) {
         return rendering;
     }
 
-
-
     return elm.Native.Runner.values =
         { runLogic : runLogic
         , runView  : runView
