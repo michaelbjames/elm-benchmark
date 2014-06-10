@@ -9,6 +9,7 @@ Elm.Native.Runner.make = function(elm) {
     var Utils     = Elm.Native.Utils.make(elm);
     var ListUtils = Elm.Native.List.make(elm);
     var Element   = Elm.Graphics.Element.make(elm);
+    var Renderer  = ElmRuntime.Render.Element();
     var now       = (function() {
         // Returns the number of milliseconds elapsed since either the browser navigationStart event or
         // the UNIX epoch, depending on availability.
@@ -29,8 +30,9 @@ Elm.Native.Runner.make = function(elm) {
     }); 
 
 
+
     /*
-    | runLogic : [() -> ()] -> Signal [Time]
+    | runLogic : [() -> ()] -> Signal Element
     | We only want to find the time it takes to execute our input function.
     | Right now there is no nice way of doing this in elm so we much look to JS
     | for help.
@@ -44,15 +46,18 @@ Elm.Native.Runner.make = function(elm) {
         var index = 0;
         var results = [];
 
-        var deltas = Signal.constant(-1);
-        var times = A3( Signal.foldp, F2( function( delta, state ) {
+        function step(delta, state) {
             if(delta >= 0) { results.push(delta) };
             if(index >= functionArray.length) {
-                return ListUtils.fromArray(results);
+                console.log(results);
+                return A2( Element.spacer, 0, 0);
             }
             timeFunction(functionArray[index++]);
-            return ListUtils.fromArray(results);
-        }), ListUtils.Nil, deltas);
+            return A2( Element.spacer, 0, 0);
+        }
+        var baseState = A2( Element.spacer, 0, 0);
+        var deltas = Signal.constant(-1);
+        var times = A3( Signal.foldp, F2(step), baseState, deltas);
 
         function timeFunction(f) {
             var t1 = now();
@@ -63,6 +68,7 @@ Elm.Native.Runner.make = function(elm) {
             },0);
         };
 
+        // yes, yes, I know. This is way more convenient.
         setTimeout(function() {
             elm.notify(deltas.id,-1);
         },0);
@@ -71,7 +77,7 @@ Elm.Native.Runner.make = function(elm) {
     }
 
     /*
-    | runView : [() -> Element] -> Signal (Element, [Time])
+    | runView : [() -> Element] -> Signal Element
     | We execute the thunks in a given space and return a signal of a visual
     | place for them and the ever growing list of how long each element took
     | to be generated
@@ -83,9 +89,9 @@ Elm.Native.Runner.make = function(elm) {
     | TODO: * Do we need to time the entire loop?
     |       * How should we decide how much screen space to allocate to render?
     */
-    function runView(fs) {
+    function runRender(fs) {
         var functionArray = ListUtils.toArray(fs);
-        var Renderer = ElmRuntime.Render.Element();
+        
         var index = 0;
         var results = [];
         var w = 500, h = 500;
@@ -98,18 +104,13 @@ Elm.Native.Runner.make = function(elm) {
         function step(delta,state) {
             if(delta >= 0) { results.push(delta) };
             if (index >= functionArray.length) {
-                // We have one extra 0 in the front of our array
-                return Utils.Tuple2( A2( Element.spacer, 0, 0 )
-                                   , ListUtils.fromArray(results)
-                                   );
+                console.log(results);
+                return A2( Element.spacer, 0, 0 );
             };
-            return Utils.Tuple2( instrumentedElement(functionArray[index++])
-                               , ListUtils.fromArray(results));
+            return instrumentedElement(functionArray[index++]);
         }
 
-        var baseState = Utils.Tuple2(
-                instrumentedElement(functionArray[index++])
-                , ListUtils.fromArray(results));
+        var baseState = instrumentedElement(functionArray[index++]);
 
         var rendering = A3( Signal.foldp, F2(step), baseState, deltas );
 
@@ -148,8 +149,13 @@ Elm.Native.Runner.make = function(elm) {
         return rendering;
     }
 
+    function runMany(benchmarks){
+        
+    }
+
     return elm.Native.Runner.values =
-        { runLogic : runLogic
-        , runView  : runView
+        { runLogic  : runLogic
+        , runRender : runRender
+        , runMany   : runMany
         };
 };

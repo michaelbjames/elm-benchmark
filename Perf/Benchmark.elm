@@ -1,8 +1,7 @@
 module Perf.Benchmark where
 
 data Benchmark = Logic String [(() -> ())]
-               | View String [(() -> Element)]
-               | Group String [Benchmark]
+               | Render String [(() -> Element)]
 
 
 {-| Just create a benchmark for a specific function with a specific argument.
@@ -28,20 +27,17 @@ logicGroup name function inputs =
 This will test the performance of *updating* the view for a given sequence
 of events.
  
-    view "graph" graph [ [(1,1),(2,2),(3,3)], [(1,1),(2,3),(3,4)], [(1,1),(3,2),(4,4)] ]
+    render "graph" graph [ [(1,1),(2,2),(3,3)], [(1,1),(2,3),(3,4)], [(1,1),(3,2),(4,4)] ]
 -}
-view : String -> (a -> Element) -> [a] -> Benchmark
-view name function inputs =
+render : String -> (a -> Element) -> [a] -> Benchmark
+render name function inputs =
   let thunker f input = (\_ -> f input)
   in
-  View name <| map (thunker function) inputs
+  Render name <| map (thunker function) inputs
 
 {-| Just get the cost of rendering from scratch. This does not get any of
 the benefits of diffing to speed things up, so it is mainly useful for
 assessing page load time.
 -}
-staticView : String -> Element -> Benchmark
-staticView name element = view name (\_ -> element) [()]
- 
-group : String -> [Benchmark] -> Benchmark
-group = Group
+staticRender : String -> Element -> Benchmark
+staticRender name element = render name (\_ -> element) [()]

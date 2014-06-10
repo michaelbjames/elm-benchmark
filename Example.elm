@@ -18,21 +18,20 @@ fibMark = logicGroup "high fibonacci" fibWrapper [20..30]
 circleWrapper : Color -> Int -> Element
 circleWrapper col n = collage 200 200 [filled col <| circle <| toFloat n]
 
-visMark : Benchmark
-visMark = view "Circle" (circleWrapper red) [10..50]
+renderMark : Benchmark
+renderMark = render "Circle" (circleWrapper red) [10..50]
 
 staticMark : Benchmark
-staticMark = staticView "Blue Circle" (circleWrapper blue 100)
+staticMark = staticRender "Blue Circle" (circleWrapper blue 100)
 
-groupMark : Benchmark
-groupMark = Group "groupMark"
-                [ visMark
-                , fibMark
-                , staticMark
-                ]
+groupMark : [Benchmark]
+groupMark = [ renderMark
+            , fibMark
+            , staticMark
+            ]
 
-runner : Signal Result
-runner = run <| visMark
+runner : Signal Element
+runner = run <| renderMark
 
 main : Signal Element
-main = lift display runner
+main = runner
