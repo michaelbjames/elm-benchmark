@@ -19,19 +19,18 @@ circleWrapper : Color -> Int -> Element
 circleWrapper col n = collage 200 200 [filled col <| circle <| toFloat n]
 
 renderMark : Benchmark
-renderMark = render "Circle" (circleWrapper red) [10..50]
+renderMark = render "Circle" (circleWrapper red) [10..49]
 
 staticMark : Benchmark
 staticMark = staticRender "Blue Circle" (circleWrapper blue 100)
 
 groupMark : [Benchmark]
 groupMark = [ renderMark
-            , fibMark
-            , staticMark
+            , renderMark
             ]
 
 runner : Signal Element
-runner = run <| renderMark
+runner = runMany groupMark
 
 main : Signal Element
 main = runner

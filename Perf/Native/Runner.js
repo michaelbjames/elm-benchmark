@@ -146,11 +146,87 @@ Elm.Native.Runner.make = function(elm) {
             setTimeout(function() { elm.notify(deltas.id, t2 - t1); }, 0);
         }
 
+
         return rendering;
     }
-
+    // runMany : [Benchmark] -> Signal Element
     function runMany(benchmarks){
+        var bms = ListUtils.toArray(benchmarks);
+        var totalBenchmarks = bms.length;
+        var bmIndex   = 0;
+        var index     = 0;
+        var deltas = Signal.constant(-1);
+        var w = 500, h = 500;
         
+        var results = [[]];
+        var currentFunctions = getNextFunctions(bmIndex);
+        function getNextFunctions(benchmarkIndex) {
+            return ListUtils.toArray(bms[benchmarkIndex]._1);
+        }
+
+        // time -> Element -> Element
+        function bmStep (delta, state) {
+            if(delta >= 0) results[bmIndex].push(delta);
+            if(index >= currentFunctions.length) {
+                index = 0;
+                bmIndex++;
+                if(bmIndex >= totalBenchmarks) {
+                    console.log(results);
+                    return A2(Element.spacer, 0, 0);
+                }
+                results.push([]);
+                currentFunctions = getNextFunctions(bmIndex);
+            }
+
+            return instrumentedElement(currentFunctions[index++]);
+        }
+
+        var bmBaseState = instrumentedElement(currentFunctions[index++]);
+        var accumulation = A3( Signal.foldp, F2(bmStep), bmBaseState, deltas);
+
+
+        // type Model = { thunk : () -> Element, cachedElement : Element }
+        // model : Model
+        // render : Model -> DOM
+        // update : DOM -> Model -> Model -> ()
+
+        function instrumentedElement(thunk) {
+           return A3(Element.newElement, w, h,
+                    { ctor: 'Custom'
+                    , type: 'customBenchmark'
+                    , render: benchRender
+                    , update: benchUpdate
+                    , model: thunk
+                    }); 
+        }
+
+        function benchRender(thunk) {
+            var t1           = now();
+            var newRendering = Renderer.render(thunk(Utils.Tuple0));
+            var t2           = now();
+            setTimeout(function() { elm.notify(deltas.id, t2 - t1); }, 0);
+            return newRendering
+        }
+
+        function benchUpdate(node, oldThunk, newThunk) {
+            var t1           = now();
+            var oldModel     = oldThunk(Utils.Tuple0);
+            var newModel     = newThunk(Utils.Tuple0)
+            var newRendering = Renderer.update(node, oldModel, newModel);
+            var t2           = now();
+            setTimeout(function() { elm.notify(deltas.id, t2 - t1); }, 0);
+        }
+
+        function timeFunction(f) {
+            var t1 = now();
+            f(Utils.Tuple0);
+            var t2 = now();
+            setTimeout(function() {
+                elm.notify(deltas.id, t2 - t1);
+            },0);
+        };
+
+        return accumulation;
     }
 
     return elm.Native.Runner.values =
