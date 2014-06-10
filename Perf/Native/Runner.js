@@ -94,7 +94,8 @@ Elm.Native.Runner.make = function(elm) {
         // timeDelta, it sets up another wrapped element to be given back
         // to Elm and timed (which will notify this foldp again)
         var deltas = Signal.constant(-1);
-        var rendering = A3( Signal.foldp, F2(function(delta,state) {
+
+        function step(delta,state) {
             if(delta >= 0) { results.push(delta) };
             if (index >= functionArray.length) {
                 // We have one extra 0 in the front of our array
@@ -104,9 +105,13 @@ Elm.Native.Runner.make = function(elm) {
             };
             return Utils.Tuple2( instrumentedElement(functionArray[index++])
                                , ListUtils.fromArray(results));
-        }), Utils.Tuple2( A2( Element.spacer, 0, 0 )
-                        , ListUtils.fromArray(results)
-                        ), deltas);
+        }
+
+        var baseState = Utils.Tuple2(
+                instrumentedElement(functionArray[index++])
+                , ListUtils.fromArray(results));
+
+        var rendering = A3( Signal.foldp, F2(step), baseState, deltas );
 
         // type Model = { thunk : () -> Element, cachedElement : Element }
         // model : Model
@@ -139,10 +144,6 @@ Elm.Native.Runner.make = function(elm) {
             var t2           = now();
             setTimeout(function() { elm.notify(deltas.id, t2 - t1); }, 0);
         }
-
-        setTimeout(function() {
-            elm.notify(deltas.id,-1);
-        },0);
 
         return rendering;
     }

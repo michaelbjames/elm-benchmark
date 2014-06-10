@@ -32,7 +32,7 @@ groupMark = Group "groupMark"
                 ]
 
 runner : Signal Result
-runner = run <| groupMark
+runner = run <| visMark
 
 main : Signal Element
 main = lift display runner
