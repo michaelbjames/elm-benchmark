@@ -22,23 +22,26 @@ fibWrapper n = let _ = fib n in ()
 fibMark : Benchmark
 fibMark = logicGroup "high fibonacci" fibWrapper [20..30]
 
-circleWrapper : Int -> Element
-circleWrapper n = collage 200 200 [filled red <| circle <| toFloat n]
+circleWrapper : Color -> Int -> Element
+circleWrapper col n = collage 200 200 [filled col <| circle <| toFloat n]
 
-visMark : Benchmark
-visMark = view "Circle" circleWrapper [10..50]
+renderMark : Benchmark
+renderMark = render "Circle" (circleWrapper red) [10..49]
 
-groupMark : Benchmark
-groupMark = Group "groupMark"
-                [ visMark
-                , fibMark
-                ]
+staticMark : Benchmark
+staticMark = staticRender "Blue Circle" (circleWrapper blue 100)
 
-runner : Signal Result
-runner = run <| groupMark
+groupMark : [Benchmark]
+groupMark = [ staticMark
+            , fibMark
+            , renderMark
+            ]
+
+runner : Signal Element
+runner = run groupMark
 
 main : Signal Element
-main = lift display runner
+main = runner
 ```
 
 
