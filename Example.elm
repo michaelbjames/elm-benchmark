@@ -31,7 +31,7 @@ groupMark = [ renderMark
             ]
 
 runner : Signal Element
-runner = runMany groupMark
+runner = run groupMark
 
 main : Signal Element
 main = runner

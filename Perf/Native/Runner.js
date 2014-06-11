@@ -29,127 +29,9 @@ Elm.Native.Runner.make = function(elm) {
         return performance.now();
     }); 
 
-
-
-    /*
-    | runLogic : [() -> ()] -> Signal Element
-    | We only want to find the time it takes to execute our input function.
-    | Right now there is no nice way of doing this in elm so we much look to JS
-    | for help.
-    | To remain responsive we use timeouts that call the foldp to begin running
-    | the next function. We can return and build up a growing list of how long
-    | these functions take.
-    */
-    function runLogic(fs) {
-
-        var functionArray = ListUtils.toArray(fs);
-        var index = 0;
-        var results = [];
-
-        function step(delta, state) {
-            if(delta >= 0) { results.push(delta) };
-            if(index >= functionArray.length) {
-                console.log(results);
-                return A2( Element.spacer, 0, 0);
-            }
-            timeFunction(functionArray[index++]);
-            return A2( Element.spacer, 0, 0);
-        }
-        var baseState = A2( Element.spacer, 0, 0);
-        var deltas = Signal.constant(-1);
-        var times = A3( Signal.foldp, F2(step), baseState, deltas);
-
-        function timeFunction(f) {
-            var t1 = now();
-            f(Utils.Tuple0);
-            var t2 = now();
-            setTimeout(function() {
-                elm.notify(deltas.id, t2 - t1);
-            },0);
-        };
-
-        // yes, yes, I know. This is way more convenient.
-        setTimeout(function() {
-            elm.notify(deltas.id,-1);
-        },0);
-
-        return times;
-    }
-
-    /*
-    | runView : [() -> Element] -> Signal Element
-    | We execute the thunks in a given space and return a signal of a visual
-    | place for them and the ever growing list of how long each element took
-    | to be generated
-    | We are forced to hook into the render's calls (render & update) so we
-    | can get a mesurement of how long they take. A call to one of the wrappers
-    | causes the rendering foldp to add another time and element, starting
-    | the whole process again
-    |
-    | TODO: * Do we need to time the entire loop?
-    |       * How should we decide how much screen space to allocate to render?
-    */
-    function runRender(fs) {
-        var functionArray = ListUtils.toArray(fs);
-        
-        var index = 0;
-        var results = [];
-        var w = 500, h = 500;
-
-        // This foldp is what keeps the cycle going. When it gets a new
-        // timeDelta, it sets up another wrapped element to be given back
-        // to Elm and timed (which will notify this foldp again)
-        var deltas = Signal.constant(-1);
-
-        function step(delta,state) {
-            if(delta >= 0) { results.push(delta) };
-            if (index >= functionArray.length) {
-                console.log(results);
-                return A2( Element.spacer, 0, 0 );
-            };
-            return instrumentedElement(functionArray[index++]);
-        }
-
-        var baseState = instrumentedElement(functionArray[index++]);
-
-        var rendering = A3( Signal.foldp, F2(step), baseState, deltas );
-
-        // type Model = { thunk : () -> Element, cachedElement : Element }
-        // model : Model
-        // render : Model -> DOM
-        // update : DOM -> Model -> Model -> ()
-
-        function instrumentedElement(thunk) {
-           return A3(Element.newElement, w, h,
-                    { ctor: 'Custom'
-                    , type: 'customBenchmark'
-                    , render: benchRender
-                    , update: benchUpdate
-                    , model: thunk
-                    }); 
-        }
-
-        function benchRender(thunk) {
-            var t1           = now();
-            var newRendering = Renderer.render(thunk(Utils.Tuple0));
-            var t2           = now();
-            setTimeout(function() { elm.notify(deltas.id, t2 - t1); }, 0);
-            return newRendering
-        }
-
-        function benchUpdate(node, oldThunk, newThunk) {
-            var t1           = now();
-            var oldModel     = oldThunk(Utils.Tuple0);
-            var newModel     = newThunk(Utils.Tuple0)
-            var newRendering = Renderer.update(node, oldModel, newModel);
-            var t2           = now();
-            setTimeout(function() { elm.notify(deltas.id, t2 - t1); }, 0);
-        }
-
-
-        return rendering;
-    }
-    // runMany : [Benchmark] -> Signal Element
+    /* runMany : [Benchmark] -> Signal Element
+     |
+     */
     function runMany(benchmarks){
         var bms = ListUtils.toArray(benchmarks);
         var totalBenchmarks = bms.length;
@@ -163,14 +45,20 @@ Elm.Native.Runner.make = function(elm) {
         var currentFunctionType = bms[bmIndex].ctor;
 
         // time -> Element -> Element
-        function bmStep (delta, state) {
-            if(delta >= 0) results[bmIndex].push(delta);
+        function bmStep (deltaObject, state) {
+            if(deltaObject.ctor === 'Pure') {
+                results[bmIndex].push(deltaObject.time);
+            }
+            if(deltaObject.ctor === 'Rendering') {
+                results[bmIndex].push(now() - deltaObject.time);
+            }
             if(index >= currentFunctions.length) {
                 index = 0;
                 bmIndex++;
                 if(bmIndex >= totalBenchmarks) {
                     console.log(results);
                     return A2(Element.spacer, 0, 0);
+                    // return elm.Text.values.asText(results);
                 }
                 results.push([]);
                 currentFunctions = ListUtils.toArray(bms[bmIndex]._1);
@@ -214,8 +102,10 @@ Elm.Native.Runner.make = function(elm) {
         function benchRender(thunk) {
             var t1           = now();
             var newRendering = Renderer.render(thunk(Utils.Tuple0));
-            var t2           = now();
-            setTimeout(function() { elm.notify(deltas.id, t2 - t1); }, 0);
+            var deltaObject  = { ctor: 'Rendering'
+                               , time: t1
+                               };
+            setTimeout(function() { elm.notify(deltas.id, deltaObject); }, 0);
             return newRendering
         }
 
@@ -224,16 +114,20 @@ Elm.Native.Runner.make = function(elm) {
             var oldModel     = oldThunk(Utils.Tuple0);
             var newModel     = newThunk(Utils.Tuple0)
             var newRendering = Renderer.update(node, oldModel, newModel);
-            var t2           = now();
-            setTimeout(function() { elm.notify(deltas.id, t2 - t1); }, 0);
+            var deltaObject  = { ctor: 'Rendering'
+                               , time: t1
+                               };
+            setTimeout(function() { elm.notify(deltas.id, deltaObject); }, 0);
         }
 
         function timeFunction(f) {
             var t1 = now();
             f(Utils.Tuple0);
             var t2 = now();
+            var deltaObject = { ctor: 'Pure'
+                              , time: t2 - t1}
             setTimeout(function() {
-                elm.notify(deltas.id, t2 - t1);
+                elm.notify(deltas.id, deltaObject);
             },0);
         };
 
@@ -241,8 +135,6 @@ Elm.Native.Runner.make = function(elm) {
     }
 
     return elm.Native.Runner.values =
-        { runLogic  : runLogic
-        , runRender : runRender
-        , runMany   : runMany
+        { run   : runMany
         };
 };
