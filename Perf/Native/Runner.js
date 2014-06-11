@@ -29,7 +29,7 @@ Elm.Native.Runner.make = function(elm) {
         return performance.now();
     }); 
 
-    /* runMany : [Benchmark] -> Signal Element
+    /* runMany : [Benchmark] -> Signal Either Element Time
      |
      | For rendering tests we have to be clever. We need an element to get to
      | screen. We instrument the element such that it notifies our signal and
@@ -60,47 +60,64 @@ Elm.Native.Runner.make = function(elm) {
         var index     = 0;
         var deltas = Signal.constant(-1);
         var w = 500, h = 500;
+        var emptyElem = A2( Element.spacer, 0, 0);
         
-        var results = [[]];
+        var results = [];
         var currentFunctions = ListUtils.toArray(bms[bmIndex]._1);
         var currentFunctionType = bms[bmIndex].ctor;
+        results[bmIndex] = {_:{}};
+        results[bmIndex].name = bms[bmIndex]._0;
+        results[bmIndex].times = [];
 
         // time -> Element -> Element
-        function bmStep (deltaObject, state) {
+        function bmStep (deltaObject, _) {
             if(deltaObject.ctor === 'Pure') {
-                results[bmIndex].push(deltaObject.time);
+                results[bmIndex].times.push(deltaObject.time);
             }
             if(deltaObject.ctor === 'Rendering') {
-                results[bmIndex].push(now() - deltaObject.time);
+                results[bmIndex].times.push(now() - deltaObject.time);
             }
             if(index >= currentFunctions.length) {
+                results[bmIndex].times = ListUtils.fromArray(results[bmIndex].times);
                 index = 0;
                 bmIndex++;
                 if(bmIndex >= totalBenchmarks) {
-                    console.log(results);
-                    return A2(Element.spacer, 0, 0);
-                    // return elm.Text.values.asText(results);
+                    return { ctor : 'Right'
+                           , _0   : ListUtils.fromArray(results)
+                           }
                 }
-                results.push([]);
+                results.push({_:{}});
+                results[bmIndex].name = bms[bmIndex]._0;
+                results[bmIndex].times = [];
                 currentFunctions = ListUtils.toArray(bms[bmIndex]._1);
                 currentFunctionType = bms[bmIndex].ctor;
             }
             if(currentFunctionType === 'Logic') {
                 timeFunction(currentFunctions[index++]);
-                return A2( Element.spacer, 0, 0);
+                return { ctor : 'Left'
+                       , _0   : emptyElem
+                       }
+            } else {
+                var elem = instrumentedElement(currentFunctions[index++]);
+                return { ctor : 'Left'
+                       , _0   : elem
+                       }
             }
-            else
-                return instrumentedElement(currentFunctions[index++]);
         }
 
         var bmBaseState;
         if(currentFunctionType === 'Logic') {
-            bmBaseState = A2( Element.spaver, 0, 0);
+            bmBaseState = { ctor : 'Left'
+                          , _0   : emptyElem
+                          }
             setTimeout(function() {
                 elm.notify(deltas.id, -1);
             },100); // Need time for the fold to get hooked up
         } else {
-            bmBaseState = instrumentedElement(currentFunctions[index++]);
+            var elem = instrumentedElement(currentFunctions[index++]);
+            bmBaseState = { ctor : 'Left'
+                          , _0   : elem
+                          }
         }
         var accumulation = A3( Signal.foldp, F2(bmStep), bmBaseState, deltas);
 

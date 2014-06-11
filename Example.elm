@@ -25,7 +25,7 @@ staticMark : Benchmark
 staticMark = staticRender "Blue Circle" (circleWrapper blue 100)
 
 groupMark : [Benchmark]
-groupMark = [ renderMark
+groupMark = [ staticMark
             , fibMark
             , renderMark
             ]
