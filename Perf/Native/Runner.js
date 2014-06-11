@@ -59,7 +59,7 @@ Elm.Native.Runner.make = function(elm) {
         var bmIndex   = 0;
         var index     = 0;
         var deltas = Signal.constant(-1);
-        var w = 500, h = 500;
+        var w = 1000, h = 1000;
         var emptyElem = Element.empty;
         
         var results = [];
