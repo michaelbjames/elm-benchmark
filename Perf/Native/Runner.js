@@ -9,6 +9,7 @@ Elm.Native.Runner.make = function(elm) {
     var Utils     = Elm.Native.Utils.make(elm);
     var ListUtils = Elm.Native.List.make(elm);
     var Element   = Elm.Graphics.Element.make(elm);
+    var Renderer  = ElmRuntime.Render.Element();
     var now       = (function() {
         // Returns the number of milliseconds elapsed since either the browser navigationStart event or
         // the UNIX epoch, depending on availability.
@@ -28,90 +29,98 @@ Elm.Native.Runner.make = function(elm) {
         return performance.now();
     }); 
 
-
-    /*
-    | runLogic : [() -> ()] -> Signal [Time]
-    | We only want to find the time it takes to execute our input function.
-    | Right now there is no nice way of doing this in elm so we much look to JS
-    | for help.
-    | To remain responsive we use timeouts that call the foldp to begin running
-    | the next function. We can return and build up a growing list of how long
-    | these functions take.
-    */
-    function runLogic(fs) {
-
-        var functionArray = ListUtils.toArray(fs);
-        var index = 0;
-        var results = [];
-
+    /* runMany : [Benchmark] -> Signal Either Element Time
+     |
+     | For rendering tests we have to be clever. We need an element to get to
+     | screen. We instrument the element such that it notifies our signal and
+     | consequently updates the foldp upon being rendered or updated.
+     | Thanks to evancz for the advice on this!
+     |
+     | For pure tests we still have to return an element, so it's blank. We
+     | also do not need this rendering trick as the functions are pure thunks.
+     | We asynchronously run the pure function while timing it. When it
+     | completes, it notifies the signal.
+     |
+     | When the signal is notified it recieves either a delta time or a
+     | timestamp, distinguished by the type of deltaObject. After it is
+     | appropriately placed in the results, the function grabs the next function
+     | in the current benchmark (either a logic or a view benchmark). If there
+     | are no more thunks left in the current benchmark, then the foldp goes on
+     | to the next set of functions. This continues until we run out of
+     | benchmarks at which point we display the results of all benchmarks.
+     |
+     | This is intentionally a monolithic function. The hope is to clean this
+     | up when we need more functionality and when more features have been
+     | added to Elm. It is possible that Commands will help.
+     */
+    function runMany(benchmarks){
+        var bms = ListUtils.toArray(benchmarks);
+        var totalBenchmarks = bms.length;
+        var bmIndex   = 0;
+        var index     = 0;
         var deltas = Signal.constant(-1);
-        var times = A3( Signal.foldp, F2( function( delta, state ) {
-            if(delta >= 0) { results.push(delta) };
-            if(index >= functionArray.length) {
-                return ListUtils.fromArray(results);
-            }
-            timeFunction(functionArray[index++]);
-            return ListUtils.fromArray(results);
-        }), ListUtils.Nil, deltas);
-
-        function timeFunction(f) {
-            var t1 = now();
-            f(Utils.Tuple0);
-            var t2 = now();
-            setTimeout(function() {
-                elm.notify(deltas.id, t2 - t1);
-            },0);
-        };
-
-        setTimeout(function() {
-            elm.notify(deltas.id,-1);
-        },0);
-
-        return times;
-    }
-
-    /*
-    | runView : [() -> Element] -> Signal (Element, [Time])
-    | We execute the thunks in a given space and return a signal of a visual
-    | place for them and the ever growing list of how long each element took
-    | to be generated
-    | We are forced to hook into the render's calls (render & update) so we
-    | can get a mesurement of how long they take. A call to one of the wrappers
-    | causes the rendering foldp to add another time and element, starting
-    | the whole process again
-    |
-    | TODO: * Do we need to time the entire loop?
-    |       * How should we decide how much screen space to allocate to render?
-    */
-    function runView(fs) {
-        var functionArray = ListUtils.toArray(fs);
-        var Renderer = ElmRuntime.Render.Element();
-        var index = 0;
-        var results = [];
         var w = 500, h = 500;
+        var emptyElem = A2( Element.spacer, 0, 0);
+        
+        var results = [];
+        var currentFunctions = ListUtils.toArray(bms[bmIndex]._1);
+        var currentFunctionType = bms[bmIndex].ctor;
+        results[bmIndex] = {_:{}};
+        results[bmIndex].name = bms[bmIndex]._0;
+        results[bmIndex].times = [];
 
-        // This foldp is what keeps the cycle going. When it gets a new
-        // timeDelta, it sets up another wrapped element to be given back
-        // to Elm and timed (which will notify this foldp again)
-        var deltas = Signal.constant(-1);
-
-        function step(delta,state) {
-            if(delta >= 0) { results.push(delta) };
-            if (index >= functionArray.length) {
-                // We have one extra 0 in the front of our array
-                return Utils.Tuple2( A2( Element.spacer, 0, 0 )
-                                   , ListUtils.fromArray(results)
-                                   );
-            };
-            return Utils.Tuple2( instrumentedElement(functionArray[index++])
-                               , ListUtils.fromArray(results));
+        // time -> Element -> Element
+        function bmStep (deltaObject, _) {
+            if(deltaObject.ctor === 'Pure') {
+                results[bmIndex].times.push(deltaObject.time);
+            }
+            if(deltaObject.ctor === 'Rendering') {
+                results[bmIndex].times.push(now() - deltaObject.time);
+            }
+            if(index >= currentFunctions.length) {
+                results[bmIndex].times = ListUtils.fromArray(results[bmIndex].times);
+                index = 0;
+                bmIndex++;
+                if(bmIndex >= totalBenchmarks) {
+                    return { ctor : 'Right'
+                           , _0   : ListUtils.fromArray(results)
+                           }
+                }
+                results.push({_:{}});
+                results[bmIndex].name = bms[bmIndex]._0;
+                results[bmIndex].times = [];
+                currentFunctions = ListUtils.toArray(bms[bmIndex]._1);
+                currentFunctionType = bms[bmIndex].ctor;
+            }
+            if(currentFunctionType === 'Logic') {
+                timeFunction(currentFunctions[index++]);
+                return { ctor : 'Left'
+                       , _0   : emptyElem
+                       }
+            } else {
+                var elem = instrumentedElement(currentFunctions[index++]);
+                return { ctor : 'Left'
+                       , _0   : elem
+                       }
+            }
         }
 
-        var baseState = Utils.Tuple2(
-                instrumentedElement(functionArray[index++])
-                , ListUtils.fromArray(results));
+        var bmBaseState;
+        if(currentFunctionType === 'Logic') {
+            bmBaseState = { ctor : 'Left'
+                          , _0   : emptyElem
+                          }
+            setTimeout(function() {
+                elm.notify(deltas.id, -1);
+            },100); // Need time for the fold to get hooked up
+        } else {
+            var elem = instrumentedElement(currentFunctions[index++]);
+            bmBaseState = { ctor : 'Left'
+                          , _0   : elem
+                          }
+        }
+        var accumulation = A3( Signal.foldp, F2(bmStep), bmBaseState, deltas);
 
-        var rendering = A3( Signal.foldp, F2(step), baseState, deltas );
 
         // type Model = { thunk : () -> Element, cachedElement : Element }
         // model : Model
@@ -131,8 +140,10 @@ Elm.Native.Runner.make = function(elm) {
         function benchRender(thunk) {
             var t1           = now();
             var newRendering = Renderer.render(thunk(Utils.Tuple0));
-            var t2           = now();
-            setTimeout(function() { elm.notify(deltas.id, t2 - t1); }, 0);
+            var deltaObject  = { ctor: 'Rendering'
+                               , time: t1
+                               };
+            setTimeout(function() { elm.notify(deltas.id, deltaObject); }, 0);
             return newRendering
         }
 
@@ -141,15 +152,27 @@ Elm.Native.Runner.make = function(elm) {
             var oldModel     = oldThunk(Utils.Tuple0);
             var newModel     = newThunk(Utils.Tuple0)
             var newRendering = Renderer.update(node, oldModel, newModel);
-            var t2           = now();
-            setTimeout(function() { elm.notify(deltas.id, t2 - t1); }, 0);
+            var deltaObject  = { ctor: 'Rendering'
+                               , time: t1
+                               };
+            setTimeout(function() { elm.notify(deltas.id, deltaObject); }, 0);
         }
 
-        return rendering;
+        function timeFunction(f) {
+            var t1 = now();
+            f(Utils.Tuple0);
+            var t2 = now();
+            var deltaObject = { ctor: 'Pure'
+                              , time: t2 - t1}
+            setTimeout(function() {
+                elm.notify(deltas.id, deltaObject);
+            },0);
+        };
+
+        return accumulation;
     }
 
     return elm.Native.Runner.values =
-        { runLogic : runLogic
-        , runView  : runView
+        { run   : runMany
         };
 };
