@@ -7,7 +7,7 @@ import Either (..)
 type Result = { name:String, times:[Time] }
 
 run : [Benchmark] -> Signal Element
-run bms = lift display <| Native.Runner.run bms
+run bms = lift display <| Native.Runner.runMany bms
 
 display : Either Element [Result] -> Element
 display elementString = case elementString of

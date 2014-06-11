@@ -64,6 +64,11 @@ Elm.Native.Runner.make = function(elm) {
         
         var results = [];
         var currentFunctions = ListUtils.toArray(bms[bmIndex]._1);
+        if (currentFunctions.length < 1) {
+            console.log("One of your benchmarks didn't have any functions to\
+run. This is a fatal error.");
+            return;
+        }
         var currentFunctionType = bms[bmIndex].ctor;
         results[bmIndex] = {_:{}};
         results[bmIndex].name = bms[bmIndex]._0;
@@ -86,6 +91,7 @@ Elm.Native.Runner.make = function(elm) {
                            , _0   : ListUtils.fromArray(results)
                            }
                 }
+                // Consider refreshing the screen at this point
                 results.push({_:{}});
                 results[bmIndex].name = bms[bmIndex]._0;
                 results[bmIndex].times = [];
@@ -150,7 +156,7 @@ Elm.Native.Runner.make = function(elm) {
         function benchUpdate(node, oldThunk, newThunk) {
             var t1           = now();
             var oldModel     = oldThunk(Utils.Tuple0);
-            var newModel     = newThunk(Utils.Tuple0)
+            var newModel     = newThunk(Utils.Tuple0);
             var newRendering = Renderer.update(node, oldModel, newModel);
             var deltaObject  = { ctor: 'Rendering'
                                , time: t1
@@ -173,6 +179,6 @@ Elm.Native.Runner.make = function(elm) {
     }
 
     return elm.Native.Runner.values =
-        { run   : runMany
+        { runMany   : runMany
         };
 };
