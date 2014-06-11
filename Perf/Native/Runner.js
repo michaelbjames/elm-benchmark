@@ -60,7 +60,7 @@ Elm.Native.Runner.make = function(elm) {
         var index     = 0;
         var deltas = Signal.constant(-1);
         var w = 500, h = 500;
-        var emptyElem = A2( Element.spacer, 0, 0);
+        var emptyElem = Element.empty;
         
         var results = [];
         var currentFunctions = ListUtils.toArray(bms[bmIndex]._1);
