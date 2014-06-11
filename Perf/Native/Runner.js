@@ -74,8 +74,11 @@ run. This is a fatal error.");
         results[bmIndex].name = bms[bmIndex]._0;
         results[bmIndex].times = [];
 
+        var startTime = now();
+
         // time -> Element -> Element
         function bmStep (deltaObject, _) {
+            var doWork = true;
             if(deltaObject.ctor === 'Pure') {
                 results[bmIndex].times.push(deltaObject.time);
             }
@@ -87,23 +90,34 @@ run. This is a fatal error.");
                 index = 0;
                 bmIndex++;
                 if(bmIndex >= totalBenchmarks) {
+                    console.log(now() - startTime);
                     return { ctor : 'Right'
                            , _0   : ListUtils.fromArray(results)
                            }
                 }
                 // Consider refreshing the screen at this point
+                doWork = false;
                 results.push({_:{}});
                 results[bmIndex].name = bms[bmIndex]._0;
                 results[bmIndex].times = [];
                 currentFunctions = ListUtils.toArray(bms[bmIndex]._1);
                 currentFunctionType = bms[bmIndex].ctor;
             }
+            if(!doWork) {
+                console.log("Not doing woooooorkkk");
+                setTimeout(function(){
+                    elm.notify(deltas.id,{});
+                },1000);
+                return { ctor : 'Left'
+                       , _0   : emptyElem
+                       }
+            }
             if(currentFunctionType === 'Logic') {
                 timeFunction(currentFunctions[index++]);
                 return { ctor : 'Left'
                        , _0   : emptyElem
                        }
-            } else {
+            } else if (currentFunctionType === 'Render'){
                 var elem = instrumentedElement(currentFunctions[index++]);
                 return { ctor : 'Left'
                        , _0   : elem
