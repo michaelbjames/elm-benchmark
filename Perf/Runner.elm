@@ -1,4 +1,4 @@
-module Perf.Runner where
+module Perf.Runner (run) where
 
 import Perf.Benchmark (..)
 import Native.Runner
