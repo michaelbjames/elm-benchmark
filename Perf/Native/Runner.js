@@ -159,10 +159,8 @@ Elm.Native.Runner.make = function(elm) {
         var w = 500, h = 500;
         
         var results = [[]];
-        var currentFunctions = getNextFunctions(bmIndex);
-        function getNextFunctions(benchmarkIndex) {
-            return ListUtils.toArray(bms[benchmarkIndex]._1);
-        }
+        var currentFunctions = ListUtils.toArray(bms[bmIndex]._1);
+        var currentFunctionType = bms[bmIndex].ctor;
 
         // time -> Element -> Element
         function bmStep (delta, state) {
@@ -175,13 +173,26 @@ Elm.Native.Runner.make = function(elm) {
                     return A2(Element.spacer, 0, 0);
                 }
                 results.push([]);
-                currentFunctions = getNextFunctions(bmIndex);
+                currentFunctions = ListUtils.toArray(bms[bmIndex]._1);
+                currentFunctionType = bms[bmIndex].ctor;
             }
-
-            return instrumentedElement(currentFunctions[index++]);
+            if(currentFunctionType === 'Logic') {
+                timeFunction(currentFunctions[index++]);
+                return A2( Element.spacer, 0, 0);
+            }
+            else
+                return instrumentedElement(currentFunctions[index++]);
         }
 
-        var bmBaseState = instrumentedElement(currentFunctions[index++]);
+        var bmBaseState;
+        if(currentFunctionType === 'Logic') {
+            bmBaseState = A2( Element.spaver, 0, 0);
+            setTimeout(function() {
+                elm.notify(deltas.id, -1);
+            },100); // Need time for the fold to get hooked up
+        } else {
+            bmBaseState = instrumentedElement(currentFunctions[index++]);
+        }
         var accumulation = A3( Signal.foldp, F2(bmStep), bmBaseState, deltas);
 
 
