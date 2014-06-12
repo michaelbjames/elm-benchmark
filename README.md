@@ -82,5 +82,5 @@ We choose #3.
 
 
 ###TODO:
-* The native runner returns immediately, doing all its work in the background.
-This permits several benchmarks to run simultaneously. This is a bad thing.
+* Figure out the right amount of space to allocate for elements under the hood
+* Make lots of compliler benchmark tests
