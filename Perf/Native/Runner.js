@@ -81,8 +81,7 @@ run. This is a fatal error.");
             var doWork = true;
             if(deltaObject.ctor === 'Pure') {
                 results[bmIndex].times.push(deltaObject.time);
-            }
-            if(deltaObject.ctor === 'Rendering') {
+            } else if(deltaObject.ctor === 'Rendering') {
                 results[bmIndex].times.push(now() - deltaObject.time);
             }
             if(index >= currentFunctions.length) {
@@ -103,11 +102,11 @@ run. This is a fatal error.");
                 currentFunctions = ListUtils.toArray(bms[bmIndex]._1);
                 currentFunctionType = bms[bmIndex].ctor;
             }
+            // insert a blank sheet between sets of thunks
             if(!doWork) {
-                console.log("Not doing woooooorkkk");
                 setTimeout(function(){
                     elm.notify(deltas.id,{});
-                },1000);
+                },0);
                 return { ctor : 'Left'
                        , _0   : emptyElem
                        }
