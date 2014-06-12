@@ -60,8 +60,11 @@ flowNames = [("addToFlow",[1..25]), ("removeFromFlow", reverse [1..25])]
 flowStep : (String,[Int]) -> [Benchmark] -> [Benchmark]
 flowStep (name,num) xs = xs ++ (map (flowBenchmark (name,num)) directions)
 
+flowLayers : (String,[Int]) -> Benchmark
+flowLayers (name,num) = render (name ++ "-layer") layers (elemsPerSet num)
+
 flows : [Benchmark]
-flows = foldr flowStep [] flowNames
+flows = (foldr flowStep [] flowNames) ++ map flowLayers flowNames
 --Swapping elements in a flow
 
 --Nested Flows
