@@ -17,18 +17,21 @@ Keffiyeh raw denim Williamsburg, iPhone flexitarian swag shabby chic semiotics b
 
 
 
+staticBenchs = [ staticRender "Left" <| leftAligned copy
+               , staticRender "Right" <| rightAligned copy
+               , staticRender "Centered" <| centered copy
+               , staticRender "Justified" <| justified copy
+               ]
+
+spinningBenchs = [ render "alignment" (\f -> f copy) [ leftAligned
+                                                     , rightAligned
+                                                     , centered
+                                                     , justified]
+                 ]
+
 
 benchmarks : [Benchmark]
-benchmarks = [ staticRender "Left" <| leftAligned copy
-             , staticRender "Right" <| rightAligned copy
-             , staticRender "Centered" <| centered copy
-             , staticRender "Justified" <| justified copy
-             ]
-             --[ render "alignment" (\f -> f copy) [ leftAligned
-             --                                    , rightAligned
-             --                                    , centered
-             --                                    , justified]
-             --]
+benchmarks = spinningBenchs
 
 extraBenchmarks : [Benchmark]
 extraBenchmarks = foldr (\a b -> b ++ repeat 3 a) [] benchmarks
