@@ -94,7 +94,7 @@ run. This is a fatal error.");
                            , _0   : ListUtils.fromArray(results)
                            }
                 }
-                // Consider refreshing the screen at this point
+                // On to the next round of thunks, do a blank element
                 doWork = false;
                 results.push({_:{}});
                 results[bmIndex].name = bms[bmIndex]._0;
