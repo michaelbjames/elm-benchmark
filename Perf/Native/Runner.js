@@ -92,7 +92,7 @@ run. This is a fatal error.");
                 index = 0;
                 bmIndex++;
                 if(bmIndex >= totalBenchmarks) {
-                    console.log(now() - startTime);
+                    console.log((now() - startTime)/10);
                     return { ctor : 'Right'
                            , _0   : ListUtils.fromArray(results)
                            }
