@@ -74,12 +74,14 @@ run. This is a fatal error.");
         results[bmIndex].name = bms[bmIndex]._0;
         results[bmIndex].times = [];
 
+        var startTime = now();
+
         // time -> Element -> Element
         function bmStep (deltaObject, _) {
+            var doWork = true;
             if(deltaObject.ctor === 'Pure') {
                 results[bmIndex].times.push(deltaObject.time);
-            }
-            if(deltaObject.ctor === 'Rendering') {
+            } else if(deltaObject.ctor === 'Rendering') {
                 results[bmIndex].times.push(now() - deltaObject.time);
             }
             if(index >= currentFunctions.length) {
@@ -87,23 +89,34 @@ run. This is a fatal error.");
                 index = 0;
                 bmIndex++;
                 if(bmIndex >= totalBenchmarks) {
+                    console.log(now() - startTime);
                     return { ctor : 'Right'
                            , _0   : ListUtils.fromArray(results)
                            }
                 }
-                // Consider refreshing the screen at this point
+                // On to the next round of thunks, do a blank element
+                doWork = false;
                 results.push({_:{}});
                 results[bmIndex].name = bms[bmIndex]._0;
                 results[bmIndex].times = [];
                 currentFunctions = ListUtils.toArray(bms[bmIndex]._1);
                 currentFunctionType = bms[bmIndex].ctor;
             }
+            // insert a blank sheet between sets of thunks
+            if(!doWork) {
+                setTimeout(function(){
+                    elm.notify(deltas.id,{});
+                },0);
+                return { ctor : 'Left'
+                       , _0   : emptyElem
+                       }
+            }
             if(currentFunctionType === 'Logic') {
                 timeFunction(currentFunctions[index++]);
                 return { ctor : 'Left'
                        , _0   : emptyElem
                        }
-            } else {
+            } else if (currentFunctionType === 'Render'){
                 var elem = instrumentedElement(currentFunctions[index++]);
                 return { ctor : 'Left'
                        , _0   : elem

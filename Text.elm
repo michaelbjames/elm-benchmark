@@ -33,8 +33,9 @@ spinningBenchs = [ render "alignment" (\f -> f copy) [ leftAligned
 benchmarks : [Benchmark]
 benchmarks = spinningBenchs
 
+
 extraBenchmarks : [Benchmark]
-extraBenchmarks = foldr (\a b -> b ++ repeat 3 a) [] benchmarks
+extraBenchmarks = foldr (\a b -> b ++ repeat 3 a) [] staticBenchs
 
 
 main : Signal Element
