@@ -163,16 +163,18 @@ spinningBenchs = [ render "alignment" (\f -> f copy) [ leftAligned
                                                      , justified]
                  ]
 
+
+showmd : Benchmark
+showmd = staticRender "Markdown" md
+
 downsizing : Benchmark
-downsizing = render "Height" (\x -> justified <| Text.height x copy)
+downsizing = render "Text.Height" (\x -> justified <| Text.height x copy)
                 <| reverse [1..100]
 
 resizing : Benchmark
 resizing = render "Resizing Markdown" (\x -> width x md)
                 <| reverse (map (\x -> x*5) [1..100])
 
-showmd : Benchmark
-showmd = staticRender "Markdown" md
 
 {-
     This benchmark shows what time is taken changing between two different styles
@@ -202,4 +204,4 @@ benchmarks = [ showmd
              ]
 
 main : Signal Element
-main = run [longStrings]
+main = run benchmarks
