@@ -27,7 +27,7 @@ Elm.Native.Runner.make = function(elm) {
             performance.mozNow        ||
             function() { return new Date().getTime(); };
         })();
-        return performance.now();
+        return Math.round(performance.now()*10);
     }); 
 
     /* runMany : [Benchmark] -> Signal Either Element Time
@@ -82,9 +82,10 @@ run. This is a fatal error.");
         function bmStep (deltaObject, _) {
             var doWork = true;
             if(deltaObject.ctor === 'Pure') {
-                results[bmIndex].times.push(deltaObject.time);
+                // This method fo rounding staves off floating point errors
+                results[bmIndex].times.push(deltaObject.time / 10);
             } else if(deltaObject.ctor === 'Rendering') {
-                results[bmIndex].times.push(now() - deltaObject.time);
+                results[bmIndex].times.push((now() - deltaObject.time) / 10);
             }
             if(index >= currentFunctions.length) {
                 results[bmIndex].times = ListUtils.fromArray(results[bmIndex].times);
