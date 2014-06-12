@@ -5,12 +5,13 @@ Elm.Native.Runner.make = function(elm) {
     elm.Native.Runner = elm.Native.Runner || {};
     if (elm.Native.Runner.values) return elm.Native.Runner.values;
 
-    var Signal    = Elm.Signal.make(elm);
-    var Utils     = Elm.Native.Utils.make(elm);
-    var ListUtils = Elm.Native.List.make(elm);
-    var Element   = Elm.Graphics.Element.make(elm);
-    var Renderer  = ElmRuntime.Render.Element();
-    var now       = (function() {
+    var Signal     = Elm.Signal.make(elm);
+    var Utils      = Elm.Native.Utils.make(elm);
+    var ListUtils  = Elm.Native.List.make(elm);
+    var Element    = Elm.Graphics.Element.make(elm);
+    var Renderer   = ElmRuntime.Render.Element();
+    var Dimensions = Elm.Native.Window.make(elm).dimensions;
+    var now        = (function() {
         // Returns the number of milliseconds elapsed since either the browser navigationStart event or
         // the UNIX epoch, depending on availability.
         // Where the browser supports 'performance' we use that as it is more accurate (microsoeconds
@@ -59,7 +60,8 @@ Elm.Native.Runner.make = function(elm) {
         var bmIndex   = 0;
         var index     = 0;
         var deltas = Signal.constant(-1);
-        var w = 1000, h = 1000;
+        var w = Dimensions.value._0;
+        var h = Dimensions.value._1;
         var emptyElem = Element.empty;
         
         var results = [];
