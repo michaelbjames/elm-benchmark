@@ -10,7 +10,7 @@ fib n =  case n of
           _ -> fib (n-1) + fib (n-2)
 
 fibWrapper : Int -> ()
-fibWrapper n = let _ = fib n in ()
+fibWrapper n = logicFunction <| fib n
 
 fibMark : Benchmark
 fibMark = logicGroup "high fibonacci" fibWrapper [20..30]
@@ -26,7 +26,7 @@ staticMark = staticRender "Blue Circle" (circleWrapper blue 100)
 
 groupMark : [Benchmark]
 groupMark = [ staticMark
-            --, fibMark
+            , fibMark
             , renderMark
             ]
 
