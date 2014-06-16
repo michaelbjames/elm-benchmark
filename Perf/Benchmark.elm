@@ -4,6 +4,16 @@ data Benchmark = Logic String [(() -> ())]
                | Render String [(() -> Element)]
 
 
+{- | Wrapping function for logical benchmarks.
+
+    logic "fibonacci" (logicFunction fib) [1..30]
+
+    Note: If your function takes no parameters, it will be prematurely evalutated!
+-}
+
+logicFunction : a -> ()
+logicFunction function = always () <| function
+
 {-| Just create a benchmark for a specific function with a specific argument.
  
     logic "factorial" fact 40
