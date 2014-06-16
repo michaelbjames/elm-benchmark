@@ -31,7 +31,7 @@ lengthBench = let multiplier = 1000000
 
 
 pushBench = let multiplier = 10000
-                trialData = map (\x -> (x,Array.repeat (multiplier * x) () )) [1..10]
+                trialData = map (\x -> (x,Array.repeat (multiplier * x) 0 )) [1..10]
                 pushWrap (x,xs) = let _ = Array.push x xs in ()
             in  logicGroup "10 Pushes" pushWrap trialData
 
@@ -71,14 +71,14 @@ mapBench = let multiplier = 1000
 foldlBench = let multiplier = 1000
                  toyFunction _ _ = ()
                  trialData = map (\x -> Array.repeat (multiplier * x) () ) [1..10]
-                 foldlWrap array = let _ = Array.foldl toyFunction () array
+                 foldlWrap array = let _ = Array.foldl toyFunction () array in ()
              in  logicGroup "foldl" foldlWrap trialData
 
 
 foldrBench = let multiplier = 1000
                  toyFunction _ _ = ()
                  trialData = map (\x -> Array.repeat (multiplier * x) () ) [1..10]
-                 foldrWrap array = let _ = Array.foldr toyFunction () array
+                 foldrWrap array = let _ = Array.foldr toyFunction () array in ()
              in  logicGroup "foldr" foldrWrap trialData
 
 
