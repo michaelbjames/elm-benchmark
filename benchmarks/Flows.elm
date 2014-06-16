@@ -14,9 +14,14 @@ intToCircle : Int -> Form
 intToCircle n = filled red <| circle <| toFloat n
 
 sampleContent : [Element]
-sampleContent =  map (image 500 100) imagePaths
-              ++ repeat 10 sampleMarkdown
-              ++ map (\x -> collage 500 100 [x]) (map intToCircle [96..100])
+sampleContent = 
+    let images = map (image 500 100) imagePaths
+        markdowns = repeat 10 sampleMarkdown
+        collages = map (\x -> collage 500 100 [x]) (map intToCircle [91..100])
+        combine1 = zip markdowns collages
+        combine2 = zip images combine1
+        flatten (a,(b,c)) = [a,b,c]
+    in foldr (++) [] <| map flatten combine2
 
 sampleMarkdown : Element
 sampleMarkdown = [markdown|
@@ -47,7 +52,12 @@ tomatoes
   : There's no "e" in tomatoe.
 |]
 
---Adding & Removing
+
+
+{-
+    Add & Remove from a flow
+-}
+
 elemsPerSet : [Int] -> [[Element]]
 elemsPerSet xs = map (\x -> take x sampleContent) xs
 
@@ -65,12 +75,30 @@ flowLayers (name,num) = render (name ++ "-layer") layers (elemsPerSet num)
 
 flows : [Benchmark]
 flows = (foldr flowStep [] flowNames) ++ map flowLayers flowNames
---Swapping elements in a flow
+
+
+
+{-
+    Swapping elements in a flow
+-}
+
+increasingSwapsBench =
+    let baseState = sampleContent
+        newContent = empty
+        diffs = map (\x -> (repeat x newContent) ++ (drop x baseState)) [1..10]
+        trials = intersperse baseState diffs
+    in  render "increasingSwapsBench" (flow down) trials
+
 
 --Nested Flows
 
 
 
 
+benchmarks : [Benchmark]
+benchmarks = flows ++
+             [ increasingSwapsBench
+             ]
+
 main : Signal Element
-main = run flows
+main = run [increasingSwapsBench]
