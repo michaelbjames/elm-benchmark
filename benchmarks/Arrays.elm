@@ -16,8 +16,7 @@ repeatBench = let multiplier = 1000000
                   repeatWrap i = let _ = Array.repeat i () in ()
               in  logicGroup ("10 repeat arrays") repeatWrap trials
 
--- We're not testing how fast function application is but how the functions
--- perform on large datasets.
+
 fromListBench = let multiplier = 1000000
                     trialData = map (\x -> [1..(multiplier * x)]) [1..10]
                     fromListWrap xs = let _ = Array.fromList xs in ()
@@ -41,6 +40,7 @@ appendBench = let multiplier = 10000
                                    Array.repeat (multiplier * x) 0)) [1..10]
                   appendWrap (l,r) = let _ = Array.append l r in ()
               in  logicGroup "Append of varying differences" appendWrap trialData
+
 
 getBench = let multiplier = 100
                trialData = map (\x -> ((multiplier * x), Array.repeat (5 * multiplier) () )) [1..5]
