@@ -90,15 +90,25 @@ increasingSwapsBench =
     in  render "increasingSwapsBench" (flow down) trials
 
 
---Nested Flows
+{-
+    Nested flows
+-}
 
-
+nestedFlowBench =
+    let clear = [empty]
+        diffs = map (\x -> take x sampleContent) [1..10]
+        trials = intersperse clear diffs
+        repeatedDirectsion = foldr (\_ d -> d ++ directions) directions [1..5]
+        step (element,direction) state = flow direction [element, state]
+        sprialNest elems = zip elems repeatedDirectsion |> foldr step empty 
+    in  render "sprialNestBench" sprialNest trials
 
 
 benchmarks : [Benchmark]
 benchmarks = flows ++
              [ increasingSwapsBench
+             , nestedFlowBench
              ]
 
 main : Signal Element
-main = run [increasingSwapsBench]
+main = run [nestedFlowBench]
