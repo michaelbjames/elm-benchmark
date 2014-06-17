@@ -19,7 +19,7 @@ insertBench =
     let multiplier = 1000
         trialData = map (\x -> [1..(multiplier * x)]) [1..10]
         insertWrap kvs = logicFunction  <| foldr (\kv d -> D.insert kv kv d) D.empty kvs
-    in  logicGroup "insert" insertWrap trialData
+    in  logic "insert" insertWrap trialData
 
 
 -- Point of discussion: what percent of the dictionary should we update?
@@ -32,7 +32,7 @@ updateBench =
                             Just v -> Just (v + 1)
                             Nothing -> Nothing
         updateWrap dict = logicFunction <| foldr (\x d -> D.update x updateFunction d) dict [1..updates]
-    in  logicGroup "update" updateWrap trialData
+    in  logic "update" updateWrap trialData
 
 
 -- No variable changes between runs. However from initial data, the first couple
@@ -43,7 +43,7 @@ removeBench =
         trialData = map D.fromList
                   <| map (\_ -> zip [1..dictSize] [1..dictSize]) [1..10]
         removeWrap dict = logicFunction <| foldr (\x d-> D.remove x d) dict [1..removes]
-    in  logicGroup "remove" removeWrap trialData
+    in  logic "remove" removeWrap trialData
 
 
 isMemberBench =
@@ -51,7 +51,7 @@ isMemberBench =
         trials = 50
         trialData = setGenerator id multiplier
         isMemberWrap d = logicFunction <| map (\x -> D.member x d) [1..trials]
-    in  logicGroup "isMember" isMemberWrap trialData
+    in  logic "isMember" isMemberWrap trialData
 
 
 isNotMemberBench =
@@ -59,7 +59,7 @@ isNotMemberBench =
         trials = 200
         trialData = setGenerator id multiplier
         isNotMemberWrap d = logicFunction <| map (\x -> D.member (x-trials) d) [1..trials]
-    in  logicGroup "isNotMember" isNotMemberWrap trialData
+    in  logic "isNotMember" isNotMemberWrap trialData
 
 
 getBench =
@@ -67,7 +67,7 @@ getBench =
         gets = 500
         trialData = setGenerator id multiplier
         getWrap dict = logicFunction <| map (\i -> D.get i dict) [1..gets]
-    in  logicGroup "get" getWrap trialData
+    in  logic "get" getWrap trialData
 
 
 
@@ -84,7 +84,7 @@ noCollisionUnion =
         rightSets = setGenerator oddArray multiplier
         trialData = zip leftSets rightSets
         unionWrap (l,r) = logicFunction <| D.union l r
-    in  logicGroup "noCollisionUnion" unionWrap trialData
+    in  logic "noCollisionUnion" unionWrap trialData
 
 
 halfCollisionUnion =
@@ -95,7 +95,7 @@ halfCollisionUnion =
         rightSets = setGenerator times4 multiplier
         trialData = zip leftSets rightSets
         unionWrap (l,r) = logicFunction <| D.union l r
-    in  logicGroup "halfCollisionUnion" unionWrap trialData
+    in  logic "halfCollisionUnion" unionWrap trialData
 
 
 noCollisionIntersect =
@@ -106,7 +106,7 @@ noCollisionIntersect =
         rightSets = setGenerator oddArray multiplier
         trialData = zip leftSets rightSets
         intersectWrap (l,r) = logicFunction <| D.intersect l r
-    in  logicGroup "noCollisionIntersect" intersectWrap trialData
+    in  logic "noCollisionIntersect" intersectWrap trialData
 
 
 halfCollisionIntersect =
@@ -117,7 +117,7 @@ halfCollisionIntersect =
         rightSets = setGenerator times4 multiplier
         trialData = zip leftSets rightSets
         intersectWrap (l,r) = logicFunction <| D.intersect l r
-    in  logicGroup "halfCollisionIntersect" intersectWrap trialData
+    in  logic "halfCollisionIntersect" intersectWrap trialData
 
 
 noCollisionDiff =
@@ -128,7 +128,7 @@ noCollisionDiff =
         rightSets = setGenerator oddArray multiplier
         trialData = zip leftSets rightSets
         diffWrap (l,r) = logicFunction <| D.diff l r
-    in  logicGroup "noCollisionDiff" diffWrap trialData
+    in  logic "noCollisionDiff" diffWrap trialData
 
 
 halfCollisionDiff =
@@ -139,7 +139,7 @@ halfCollisionDiff =
         rightSets = setGenerator times4 multiplier
         trialData = zip leftSets rightSets
         diffWrap (l,r) = logicFunction <| D.diff l r
-    in  logicGroup "halfCollisionDiff" diffWrap trialData
+    in  logic "halfCollisionDiff" diffWrap trialData
 
 
 
@@ -151,28 +151,28 @@ keysBench =
     let multiplier = 1000
         trialData = setGenerator id multiplier
         keysWrap d = logicFunction <| D.keys d
-    in  logicGroup "keys" keysWrap trialData
+    in  logic "keys" keysWrap trialData
 
 
 valuesBench =
     let multiplier = 1000
         trialData = setGenerator id multiplier
         valuesWrap d = logicFunction <| D.values d
-    in  logicGroup "values" valuesWrap trialData
+    in  logic "values" valuesWrap trialData
 
 
 toListBench =
     let multiplier = 1000
         trialData = setGenerator id multiplier
         toListWrap d = logicFunction <| D.toList d
-    in  logicGroup "toList" toListWrap trialData
+    in  logic "toList" toListWrap trialData
 
 
 fromListBench =
     let multiplier = 1000
         trialData = map (\x -> zip [1..(multiplier * x)] [1..(multiplier * x)]) [1..10]
         fromListWrap xs = logicFunction <| D.fromList xs
-    in  logicGroup "fromList" fromListWrap trialData
+    in  logic "fromList" fromListWrap trialData
 
 
 
@@ -184,7 +184,7 @@ mapBench =
     let multiplier = 1000
         trialData = setGenerator id multiplier
         mapWrap xs = logicFunction <| D.map id xs
-    in logicGroup "map" mapWrap trialData
+    in logic "map" mapWrap trialData
 
 
 
