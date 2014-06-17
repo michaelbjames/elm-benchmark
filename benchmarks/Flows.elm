@@ -56,6 +56,7 @@ tomatoes
 
 {-
     Add & Remove from a flow
+    We add and remove in every direction. This generates all those benchmarks
 -}
 
 elemsPerSet : [Int] -> [[Element]]
@@ -111,4 +112,4 @@ benchmarks = flows ++
              ]
 
 main : Signal Element
-main = run [nestedFlowBench]
+main = run benchmarks
