@@ -114,12 +114,12 @@ run. This is a fatal error.");
                        , _0   : emptyElem
                        }
             }
-            if(currentFunctionType === 'Logic') {
+            if(currentFunctionType === 'PrepLogic') {
                 timeFunction(currentFunctions[index++]);
                 return { ctor : 'Left'
                        , _0   : emptyElem
                        }
-            } else if (currentFunctionType === 'Render'){
+            } else if (currentFunctionType === 'PrepRender'){
                 var elem = instrumentedElement(currentFunctions[index++]);
                 return { ctor : 'Left'
                        , _0   : elem
@@ -128,7 +128,7 @@ run. This is a fatal error.");
         }
 
         var bmBaseState;
-        if(currentFunctionType === 'Logic') {
+        if(currentFunctionType === 'PrepLogic') {
             bmBaseState = { ctor : 'Left'
                           , _0   : emptyElem
                           }

@@ -13,7 +13,7 @@ fibWrapper : Int -> ()
 fibWrapper n = logicFunction <| fib n
 
 fibMark : Benchmark
-fibMark = logicGroup "high fibonacci" fibWrapper [20..30]
+fibMark = logic "high fibonacci" fibWrapper [20..30]
 
 circleWrapper : Color -> Int -> Element
 circleWrapper col n = collage 200 200 [filled col <| circle <| toFloat n]
