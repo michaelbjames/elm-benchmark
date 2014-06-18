@@ -12,6 +12,8 @@ margin = { top = 75, left = 0, right = 75, bottom = 0 }
 dims   = { height = height - margin.top - margin.bottom
          , width  = width - margin.left - margin.right }
 
+types = ["Avenir, Futura, Times"]
+
 scaleResults : Float -> [Time] -> [Float]
 scaleResults maxTime times =
     let factor = dims.height / maxTime
@@ -37,14 +39,20 @@ graphResult result =
         centers = zipWith (\x y -> {x = x, y = y}) xcoordinates scaled
         datapoint ({x,y}, time) = group
             [ circle radius |> filled red |> place (x,y)
-            , show time |> toText |> typeface ["Avenir, Futura, Times"]
+            , show time |> toText |> typeface types
                         |> centered |> toForm |> place (x + 15, y + 15)
                         |> rotate (degrees 30)
             ]
         datapoints = map datapoint <| zip centers result.times
         axes = group
-            [ segment (-dims.width / 2, -dims.height / 2) (dims.width / 2, -dims.height / 2) |> traced (solid black)
-            , segment (-dims.width / 2, -dims.height / 2) (-dims.width / 2, dims.height / 2) |> traced (solid black)
+            [ segment (-dims.width / 2, -dims.height / 2)
+                      ( dims.width / 2, -dims.height / 2)
+                      |> traced (solid black)
+            , segment (-dims.width / 2, -dims.height / 2)
+                      (-dims.width / 2,  dims.height / 2)
+                      |> traced (solid black)
+            , show result.name |> toText |> typeface types
+                      |> centered |> toForm |> move (0, -(dims.height / 2))
             ]
         forms = datapoints ++ [axes]
     in collage width height forms
