@@ -91,6 +91,13 @@ increasingSwapsBench =
     in  render "increasingSwapsBench" (flow down) trials
 
 
+swapNElements =
+    let baseState = sampleContent
+        swap n = (reverse (take n baseState)) ++ (drop n baseState)
+        swaps = map swap [2..10]
+        trials = intersperse baseState swaps
+    in  render "swapNElements" (flow down) trials
+
 {-
     Nested flows
 -}
@@ -109,7 +116,8 @@ benchmarks : [Benchmark]
 benchmarks = flows ++
              [ increasingSwapsBench
              , nestedFlowBench
+             , swapNElements
              ]
 
 main : Signal Element
-main = run benchmarks
+main = run [swapNElements]
