@@ -7,91 +7,91 @@ import Array
 
 emptyBench =
     let multiplier = 100000
-        trials = map (\x -> multiplier * x) [1..10]
-        manyEmpty i = let _ = foldr (\_ _ -> Array.empty) Array.empty [1..i] in ()
-    in  logic "10 empty arrays" manyEmpty trials
+        trials = inputMap (\x -> multiplier * x) [1..10]
+        manyEmpty i = logicFunction <| foldr (\_ _ -> Array.empty) Array.empty [1..i]
+    in  lazyLogic "empty arrays" manyEmpty trials
 
 
 repeatBench =
     let multiplier = 1000000
-        trials = map (\x -> multiplier * x) [1..10]
-        repeatWrap i = let _ = Array.repeat i () in ()
-    in  logic ("10 repeat arrays") repeatWrap trials
+        trials = inputMap (\x-> multiplier * x) [1..10]
+        repeatWrap i = logicFunction <| Array.repeat i ()
+    in  lazyLogic "repeat arrays" repeatWrap trials
 
 
 fromListBench =
     let multiplier = 1000000
-        trialData = map (\x -> [1..(multiplier * x)]) [1..10]
-        fromListWrap xs = let _ = Array.fromList xs in ()
-    in  logic "10 fromLists" fromListWrap trialData
+        trialData = inputMap (\x -> [1..(multiplier * x)]) [1..10]
+        fromListWrap xs = logicFunction <| Array.fromList xs
+    in  lazyLogic "fromLists" fromListWrap trialData
 
 
 lengthBench =
     let multiplier = 1000000
-        trials = map (\x -> Array.repeat (multiplier * x) () ) [1..10]
-        lengthWrap xs = let _ = Array.length xs in ()
-    in  logic "10 Lengths" lengthWrap trials
+        trials = inputMap (\x -> Array.repeat (multiplier * x) () ) [1..10]
+        lengthWrap xs = logicFunction <| Array.length xs
+    in  lazyLogic "Lengths" lengthWrap trials
 
 
 pushBench =
     let multiplier = 10000
-        trialData = map (\x -> (x,Array.repeat (multiplier * x) 0 )) [1..10]
-        pushWrap (x,xs) = let _ = Array.push x xs in ()
-    in  logic "10 Pushes" pushWrap trialData
+        trialData = inputMap (\x -> (x,Array.repeat (multiplier * x) 0 )) [1..10]
+        pushWrap (x,xs) = logicFunction <| Array.push x xs
+    in  lazyLogic "Pushes" pushWrap trialData
 
 
 appendBench =
     let multiplier = 10000
-        trialData = map (\x -> (Array.repeat (multiplier * (11-x)) 1,
+        trialData = inputMap (\x -> (Array.repeat (multiplier * (11-x)) 1,
                          Array.repeat (multiplier * x) 0)) [1..10]
-        appendWrap (l,r) = let _ = Array.append l r in ()
-    in  logic "Append of varying differences" appendWrap trialData
+        appendWrap (l,r) = logicFunction <| Array.append l r
+    in  lazyLogic "Append of varying differences" appendWrap trialData
 
 
 getBench =
     let multiplier = 100
-        trialData = map (\x -> ((multiplier * x), Array.repeat (5 * multiplier) () )) [1..5]
-        getWrap (position, array) = let _ = Array.get position array in ()
-    in  logic "Get at different positions" getWrap trialData
+        trialData = inputMap (\x -> ((multiplier * x), Array.repeat (5 * multiplier) () )) [1..5]
+        getWrap (position, array) = logicFunction <| Array.get position array
+    in  lazyLogic "Get at different positions" getWrap trialData
 
 
 sliceBench =
     let array = Array.repeat 10000 ()
         slices = [ (0, 100) , (0, -100), (-100, 900) , (-100, 0)
                  , (500, 501) , (500, 1000)]
-        sliceWrap (start, end) = let _ = Array.slice start end array in ()
+        sliceWrap (start, end) = logicFunction <| Array.slice start end array
     in  logic "Slice" sliceWrap slices
 
 
 toListBench =
     let multiplier = 1000
-        trialData = map (\x -> Array.repeat (multiplier * x) () ) [1..10]
-        toListWrap array = let _ = Array.toList in ()
-    in  logic "toList" toListWrap trialData
+        trialData = inputMap (\x -> Array.repeat (multiplier * x) () ) [1..10]
+        toListWrap array = logicFunction <| Array.toList
+    in  lazyLogic "toList" toListWrap trialData
 
 
 mapBench =
     let multiplier = 1000
         toyFunction = id
-        trialData = map (\x -> Array.repeat (multiplier * x) () ) [1..10]
-        mapWrap array = let _ = Array.map toyFunction array in ()
-    in  logic "map" mapWrap trialData
+        trialData = inputMap (\x -> Array.repeat (multiplier * x) () ) [1..10]
+        mapWrap array = logicFunction <| Array.map toyFunction array
+    in  lazyLogic "map" mapWrap trialData
 
 
 foldlBench =
     let multiplier = 1000
         toyFunction _ _ = ()
-        trialData = map (\x -> Array.repeat (multiplier * x) () ) [1..10]
-        foldlWrap array = let _ = Array.foldl toyFunction () array in ()
-    in  logic "foldl" foldlWrap trialData
+        trialData = inputMap (\x -> Array.repeat (multiplier * x) () ) [1..10]
+        foldlWrap array = logicFunction <| Array.foldl toyFunction () array
+    in  lazyLogic "foldl" foldlWrap trialData
 
 
 foldrBench =
     let multiplier = 1000
         toyFunction _ _ = ()
-        trialData = map (\x -> Array.repeat (multiplier * x) () ) [1..10]
-        foldrWrap array = let _ = Array.foldr toyFunction () array in ()
-    in  logic "foldr" foldrWrap trialData
+        trialData = inputMap (\x -> Array.repeat (multiplier * x) () ) [1..10]
+        foldrWrap array = logicFunction <| Array.foldr toyFunction () array
+    in  lazyLogic "foldr" foldrWrap trialData
 
 
 
