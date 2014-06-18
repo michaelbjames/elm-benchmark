@@ -2,6 +2,7 @@ module Main where
 
 import Perf.Runner (..)
 import Perf.Benchmark (..)
+import Perf.Types (..)
 
 
 imagePaths : [String]
@@ -120,4 +121,4 @@ benchmarks = flows ++
              ]
 
 main : Signal Element
-main = run [swapNElements]
+main = run benchmarks
