@@ -1,10 +1,15 @@
-module Perf.Runner (run) where
+module Perf.Runner
+    ( run
+    ) where
 
 import Perf.Benchmark (..)
+import Perf.Types (..)
 import Native.Runner
 import Either (..)
+import Window (..)
+import Perf.LineGraph (..)
 
-type Result = { name:String, times:[Time] }
+
 
 data PrepBenchmark = PrepLogic String [() -> ()]
                    | PrepRender String [() -> Element]
@@ -19,4 +24,4 @@ run bms =
 display : Either Element [Result] -> Element
 display elementString = case elementString of
     Left element  -> element
-    Right results -> flow down <| map asText results
+    Right results -> showResults results

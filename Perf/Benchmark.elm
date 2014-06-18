@@ -1,8 +1,6 @@
 module Perf.Benchmark where
 
-data Benchmark = Logic String [() -> () -> ()]
-               | Render String [() -> () -> Element]
-
+import Perf.Types (..)
 
 {- | Wrapping function for logical benchmarks.
 
