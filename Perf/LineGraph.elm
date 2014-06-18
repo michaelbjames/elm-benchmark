@@ -27,8 +27,10 @@ spaceOut n =
         adjust x = (toFloat x / toFloat n * dims.width) + margin.left
     in map adjust base
 
-place : (Float,Float) -> Form -> Form
-place (x,y) = move (x - (dims.width / 2), y - (dims.height / 2))
+fitPoints : [(Float, Float)] -> [(Float, Float)]
+fitPoints points =
+    let fit (x,y) = (x - (dims.width / 2), y - (dims.height / 2))
+    in  map fit points
 
 graphResult : Result -> Element
 graphResult result =
@@ -36,25 +38,28 @@ graphResult result =
         scaled = scaleResults maxTime result.times
         numResults = length result.times
         xcoordinates = log "xs" <| spaceOut numResults
-        centers = zipWith (\x y -> {x = x, y = y}) xcoordinates scaled
-        datapoint ({x,y}, time) = group
-            [ circle radius |> filled red |> place (x,y)
-            , show time |> toText |> typeface types
-                        |> centered |> toForm |> place (x + 15, y + 15)
+        centers = zip xcoordinates scaled
+        centerOriginPoints = fitPoints centers
+        datapoint ((x,y), time) = group
+            [ show time |> toText |> typeface types
+                        |> centered |> toForm |> move (x + 15, y + 15)
                         |> rotate (degrees 30)
+            , circle radius |> filled red |> move (x,y)
             ]
-        datapoints = map datapoint <| zip centers result.times
+        datapoints = map datapoint <| zip centerOriginPoints result.times
         axes = group
-            [ segment (-dims.width / 2, -dims.height / 2)
+            [ segment (-dims.width / 2, -dims.height / 2) -- X axis
                       ( dims.width / 2, -dims.height / 2)
                       |> traced (solid black)
-            , segment (-dims.width / 2, -dims.height / 2)
+            , segment (-dims.width / 2, -dims.height / 2) -- Y axis
                       (-dims.width / 2,  dims.height / 2)
                       |> traced (solid black)
-            , show result.name |> toText |> typeface types
-                      |> centered |> toForm |> move (0, -(dims.height / 2))
+            , show result.name |> toText |> typeface types -- Test name
+                      |> centered |> toForm |> move (0, -(dims.height / 2) - 20)
             ]
-        forms = datapoints ++ [axes]
+        lines = path centerOriginPoints
+              |> traced {defaultLine | color <- lightRed, join <- Smooth}
+        forms = [axes, lines] ++ datapoints
     in collage width height forms
 
 
