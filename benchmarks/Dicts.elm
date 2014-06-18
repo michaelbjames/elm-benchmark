@@ -6,7 +6,7 @@ import Dict as D
 
 
 -- Convenience function for our set functions
---setGenerator : (number -> comparable) -> number -> [D.Dict comparable number]
+setGenerator : ([number] -> [comparable]) -> number -> [() -> D.Dict comparable number]
 setGenerator arrayModification multiplier =
     inputMap D.fromList <| map (\x -> zip (arrayModification [1..(multiplier * x)])
                           [1..(multiplier * x)]) [1..10]
