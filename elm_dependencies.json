@@ -1,5 +1,5 @@
 {
-  "version" : "0.0.1",
+  "version" : "0.1.0",
   "summary" : "Code benchmarking utility",
   "description" : "Code snippet speed testing utility based on Elm-Test.",
   "license" : "BSD 3-clause",
