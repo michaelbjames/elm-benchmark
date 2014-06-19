@@ -55,8 +55,9 @@ emptyArray =
     let multiplier = 100000
         trials : [() -> Int]
         trials = inputMap (\x -> multiplier * x) [1..10]
+        -- We just need to make the arrays, not keep them
         manyEmpty : Int -> Array
-        manyEmpty i = foldr (\_ _ -> Array.empty) Array.empty [1..i] -- We just need to make the arrays, not keep them
+        manyEmpty i = foldr (\_ _ -> Array.empty) Array.empty [1..i]
     in  lazyLogic "[1..10] * 100000 empty arrays" manyEmpty trials
 ```
 `lazyLogic` here is of type `String -> (a -> b) -> [() -> a] -> Benchmark`
