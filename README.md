@@ -4,44 +4,11 @@ elm-benchmark
 Elm code benchmarking suite
 
 ###How to use this library:
+First: import what you'll need
 ```elm
-module Main where
-
 import Perf.Runner (..)
 import Perf.Benchmark (..)
-
-fib : Int -> Int
-fib n =  case n of
-          0 -> 1
-          1 -> 1
-          _ -> fib (n-1) + fib (n-2)
-
-fibWrapper : Int -> ()
-fibWrapper n = let _ = fib n in ()
-
-fibMark : Benchmark
-fibMark = logicGroup "high fibonacci" fibWrapper [20..30]
-
-circleWrapper : Color -> Int -> Element
-circleWrapper col n = collage 200 200 [filled col <| circle <| toFloat n]
-
-renderMark : Benchmark
-renderMark = render "Circle" (circleWrapper red) [10..49]
-
-staticMark : Benchmark
-staticMark = staticRender "Blue Circle" (circleWrapper blue 100)
-
-groupMark : [Benchmark]
-groupMark = [ staticMark
-            , fibMark
-            , renderMark
-            ]
-
-runner : Signal Element
-runner = run groupMark
-
-main : Signal Element
-main = runner
+import Perf.Types (..)
 ```
 
 
@@ -79,8 +46,3 @@ We need a strategy to fully render the functions while also allowing us to clean
 2. Render the function in a hidden area.
 3. Render on screen in a predefined area
 We choose #3.
-
-
-###TODO:
-* Figure out the right amount of space to allocate for elements under the hood
-* Make lots of compliler benchmark tests
