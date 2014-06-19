@@ -2,6 +2,7 @@ module Main where
 
 import Perf.Runner (..)
 import Perf.Benchmark (..)
+import Perf.Types (..)
 
 fib : Int -> Int
 fib n =  case n of
@@ -30,8 +31,5 @@ groupMark = [ staticMark
             , renderMark
             ]
 
-runner : Signal Element
-runner = run groupMark
-
 main : Signal Element
-main = runner
+main = run groupMark

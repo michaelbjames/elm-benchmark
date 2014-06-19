@@ -2,6 +2,7 @@ module Main where
 
 import Perf.Runner (..)
 import Perf.Benchmark (..)
+import Perf.Types (..)
 
 
 imagePaths : [String]
@@ -66,7 +67,9 @@ flowBenchmark: (String, [Int]) -> Direction -> Benchmark
 flowBenchmark (name,num) d = render (name ++ show d) (flow d) (elemsPerSet num)
 
 flowNames : [(String,[Int])]
-flowNames = [("addToFlow",[1..25]), ("removeFromFlow", reverse [1..25])]
+flowNames = [ ("addToFlow (start at 1 end at 25 elements) -",[1..25])
+            , ("removeFromFlow (start at 25 end at 1 element) -", reverse [1..25])
+            ]
 
 flowStep : (String,[Int]) -> [Benchmark] -> [Benchmark]
 flowStep (name,num) xs = xs ++ (map (flowBenchmark (name,num)) directions)
@@ -120,4 +123,4 @@ benchmarks = flows ++
              ]
 
 main : Signal Element
-main = run [swapNElements]
+main = run benchmarks

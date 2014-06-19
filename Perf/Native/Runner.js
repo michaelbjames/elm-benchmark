@@ -114,12 +114,12 @@ run. This is a fatal error.");
                        , _0   : emptyElem
                        }
             }
-            if(currentFunctionType === 'PrepLogic') {
+            if(currentFunctionType === 'Logic') {
                 timeFunction(currentFunctions[index++]);
                 return { ctor : 'Left'
                        , _0   : emptyElem
                        }
-            } else if (currentFunctionType === 'PrepRender'){
+            } else if (currentFunctionType === 'Render'){
                 var elem = instrumentedElement(currentFunctions[index++]);
                 return { ctor : 'Left'
                        , _0   : elem
@@ -128,7 +128,7 @@ run. This is a fatal error.");
         }
 
         var bmBaseState;
-        if(currentFunctionType === 'PrepLogic') {
+        if(currentFunctionType === 'Logic') {
             bmBaseState = { ctor : 'Left'
                           , _0   : emptyElem
                           }
@@ -160,8 +160,9 @@ run. This is a fatal error.");
         }
 
         function benchRender(thunk) {
+            var preparedThunk = thunk(Utils.Tuple0);
             var t1           = now();
-            var newRendering = Renderer.render(thunk(Utils.Tuple0));
+            var newRendering = Renderer.render(preparedThunk(Utils.Tuple0));
             var deltaObject  = { ctor: 'Rendering'
                                , time: t1
                                };
@@ -170,9 +171,11 @@ run. This is a fatal error.");
         }
 
         function benchUpdate(node, oldThunk, newThunk) {
+            var preparedOldThunk = oldThunk(Utils.Tuple0);
+            var preparedNewThunk = newThunk(Utils.Tuple0);
             var t1           = now();
-            var oldModel     = oldThunk(Utils.Tuple0);
-            var newModel     = newThunk(Utils.Tuple0);
+            var oldModel     = preparedOldThunk(Utils.Tuple0);
+            var newModel     = preparedNewThunk(Utils.Tuple0);
             var newRendering = Renderer.update(node, oldModel, newModel);
             var deltaObject  = { ctor: 'Rendering'
                                , time: t1
@@ -181,8 +184,9 @@ run. This is a fatal error.");
         }
 
         function timeFunction(f) {
+            var preparedFunction = f(Utils.Tuple0);
             var t1 = now();
-            f(Utils.Tuple0);
+            preparedFunction(Utils.Tuple0);
             var t2 = now();
             var deltaObject = { ctor: 'Pure'
                               , time: t2 - t1}
