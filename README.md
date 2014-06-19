@@ -5,14 +5,14 @@ Elm code benchmarking suite
 
 ###How to use this library:
 First: import what you'll need
-```elm
+```haskell
 import Perf.Runner (..)
 import Perf.Benchmark (..)
 import Perf.Types (..)
 ```
 
 Now a simple rendering benchmarck. How long does it take to render circles of different sizes?
-```elm
+```haskell
 circleBench : Benchmark
 circleBench =
     let circleGen : Int -> Element 
@@ -23,7 +23,7 @@ A function that is going to be benchmarked for its rendering speed MUST be of ty
 
 
 Alright, but how fast can Elm do logic?
-```elm
+```haskell
 fibBench : Benchmark
 fibBench =
     let fib n = case n of
@@ -36,7 +36,7 @@ A pure function to be benchmarked must be of type `(a->b)`.
 
 
 Let's actually run these guys and see how fast they are
-```elm
+```haskell
 benchmarks : [Benchmark]
 benchmarks = [ circleBench
              , fibBench
@@ -50,7 +50,7 @@ The screen will change before you to display the results when all benchmarks are
 
 ####A little more advanced
 Let's suppose you've got a **huge** logical test. You're testing something that happens so fast on small input most timers wouldn't catch it so you instead run it on a 1,000,000 element list. This is too much memory to just allocate at the start and hold on to until it is no longer needed. We can lazily allocate the input for the test when it is needed.
-```elm
+```haskell
 emptyArray =
     let multiplier = 100000
         trials : [() -> Int]
@@ -63,7 +63,7 @@ emptyArray =
 
 
 We can also run setup in a different way that is more similar to JSPerf's setup phase:
-```elm
+```haskell
 logicalSetup : Benchmark
 logicalSetup =
     let setup = inputMap (\x -> [1.. (1000 * x)]) [1..10]
@@ -73,7 +73,7 @@ logicalSetup =
 ```
 Note that logicSetup is of type `String -> [() -> b] -> (b -> a -> c) -> [a] -> Benchmark`.
 This works in the same way for rendering, too!
-```elm
+```haskell
 renderSetup : String -> [() -> b] -> (b -> a -> Element) -> [a] -> Benchmark
 ```
 
