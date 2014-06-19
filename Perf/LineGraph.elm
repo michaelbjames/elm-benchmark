@@ -67,6 +67,8 @@ graphResult w result =
                       |> traced (solid black)
             , show result.name |> toText |> typeface types -- Test name
                       |> centered |> toForm |> move (0, -(dims.height / 2) - 20)
+            , "milliseconds" |> toText |> typeface types |> centered |> toForm
+                      |> move (-width /2 + margin.left - 15 , 0) |> rotate (degrees 90)
             ]
         lines = path centerOriginPoints
               |> traced {defaultLine | color <- lightRed, join <- Smooth }
