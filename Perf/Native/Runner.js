@@ -171,8 +171,8 @@ run. This is a fatal error.");
         }
 
         function benchUpdate(node, oldThunk, newThunk) {
-            var prepartedOldThunk = oldThunk(Utils.Tuple0);
-            var prepartedNewThunk = newThunk(Utils.Tuple0);
+            var preparedOldThunk = oldThunk(Utils.Tuple0);
+            var preparedNewThunk = newThunk(Utils.Tuple0);
             var t1           = now();
             var oldModel     = preparedOldThunk(Utils.Tuple0);
             var newModel     = preparedNewThunk(Utils.Tuple0);

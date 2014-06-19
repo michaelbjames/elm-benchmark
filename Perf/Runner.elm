@@ -6,15 +6,15 @@ import Perf.Benchmark (..)
 import Perf.Types (..)
 import Native.Runner
 import Either (..)
-import Window (..)
+import Window
 import Perf.LineGraph (..)
 
 
 
 run : [Benchmark] -> Signal Element
-run bms = lift display <| Native.Runner.runMany bms
+run bms = lift2 display Window.width <| Native.Runner.runMany bms
 
-display : Either Element [Result] -> Element
-display elementString = case elementString of
+display : Int -> Either Element [Result] -> Element
+display w elementString = case elementString of
     Left element  -> element
-    Right results -> showResults results
+    Right results -> showResults w results
