@@ -19,7 +19,7 @@ setGenerator arrayModification multiplier =
 insertBench =
     let multiplier = 1000
         trialData = inputMap (\x -> [1..(multiplier * x)]) [1..10]
-        insertWrap kvs = logicFunction  <| foldr (\kv d -> D.insert kv kv d) D.empty kvs
+        insertWrap kvs =  foldr (\kv d -> D.insert kv kv d) D.empty kvs
     in  lazyLogic "insert" insertWrap trialData
 
 
@@ -32,7 +32,7 @@ updateBench =
         updateFunction v = case v of
                             Just v -> Just (v + 1)
                             Nothing -> Nothing
-        updateWrap dict = logicFunction <| foldr (\x d -> D.update x updateFunction d) dict [1..updates]
+        updateWrap dict = foldr (\x d -> D.update x updateFunction d) dict [1..updates]
     in  lazyLogic "update" updateWrap trialData
 
 
@@ -43,7 +43,7 @@ removeBench =
         removes = 200
         trialData = inputMap D.fromList
                   <| map (\_ -> zip [1..dictSize] [1..dictSize]) [1..10]
-        removeWrap dict = logicFunction <| foldr (\x d-> D.remove x d) dict [1..removes]
+        removeWrap dict = foldr (\x d-> D.remove x d) dict [1..removes]
     in  lazyLogic "remove" removeWrap trialData
 
 
@@ -51,7 +51,7 @@ isMemberBench =
     let multiplier = 1000
         trials = 50
         trialData = setGenerator id multiplier
-        isMemberWrap d = logicFunction <| map (\x -> D.member x d) [1..trials]
+        isMemberWrap d = map (\x -> D.member x d) [1..trials]
     in  lazyLogic "isMember" isMemberWrap trialData
 
 
@@ -59,7 +59,7 @@ isNotMemberBench =
     let multiplier = 1000
         trials = 200
         trialData = setGenerator id multiplier
-        isNotMemberWrap d = logicFunction <| map (\x -> D.member (x-trials) d) [1..trials]
+        isNotMemberWrap d = map (\x -> D.member (x-trials) d) [1..trials]
     in  lazyLogic "isNotMember" isNotMemberWrap trialData
 
 
@@ -67,7 +67,7 @@ getBench =
     let multiplier = 1000
         gets = 500
         trialData = setGenerator id multiplier
-        getWrap dict = logicFunction <| map (\i -> D.get i dict) [1..gets]
+        getWrap dict = map (\i -> D.get i dict) [1..gets]
     in  lazyLogic "get" getWrap trialData
 
 
@@ -84,7 +84,7 @@ noCollisionUnion =
         leftSets = setGenerator evenArray multiplier
         rightSets = setGenerator oddArray multiplier
         trialData = inputMap (\(l,r) -> (l(),r())) <| zip leftSets rightSets
-        unionWrap (l,r) = logicFunction <| D.union l r
+        unionWrap (l,r) = D.union l r
     in  lazyLogic "noCollisionUnion" unionWrap trialData
 
 
@@ -95,7 +95,7 @@ halfCollisionUnion =
         leftSets = setGenerator times2 multiplier
         rightSets = setGenerator times4 multiplier
         trialData = inputMap (\(l,r) -> (l(),r())) <| zip leftSets rightSets
-        unionWrap (l,r) = logicFunction <| D.union l r
+        unionWrap (l,r) = D.union l r
     in  lazyLogic "halfCollisionUnion" unionWrap trialData
 
 
@@ -106,7 +106,7 @@ noCollisionIntersect =
         leftSets = setGenerator evenArray multiplier
         rightSets = setGenerator oddArray multiplier
         trialData = inputMap (\(l,r) -> (l(),r())) <| zip leftSets rightSets
-        intersectWrap (l,r) = logicFunction <| D.intersect l r
+        intersectWrap (l,r) = D.intersect l r
     in  lazyLogic "noCollisionIntersect" intersectWrap trialData
 
 
@@ -117,7 +117,7 @@ halfCollisionIntersect =
         leftSets = setGenerator times2 multiplier
         rightSets = setGenerator times4 multiplier
         trialData = inputMap (\(l,r) -> (l(),r())) <| zip leftSets rightSets
-        intersectWrap (l,r) = logicFunction <| D.intersect l r
+        intersectWrap (l,r) = D.intersect l r
     in  lazyLogic "halfCollisionIntersect" intersectWrap trialData
 
 
@@ -128,7 +128,7 @@ noCollisionDiff =
         leftSets = setGenerator evenArray multiplier
         rightSets = setGenerator oddArray multiplier
         trialData = inputMap (\(l,r) -> (l(),r())) <| zip leftSets rightSets
-        diffWrap (l,r) = logicFunction <| D.diff l r
+        diffWrap (l,r) = D.diff l r
     in  lazyLogic "noCollisionDiff" diffWrap trialData
 
 
@@ -139,7 +139,7 @@ halfCollisionDiff =
         leftSets = setGenerator times2 multiplier
         rightSets = setGenerator times4 multiplier
         trialData = inputMap (\(l,r) -> (l(),r())) <| zip leftSets rightSets
-        diffWrap (l,r) = logicFunction <| D.diff l r
+        diffWrap (l,r) = D.diff l r
     in  lazyLogic "halfCollisionDiff" diffWrap trialData
 
 
@@ -151,28 +151,28 @@ halfCollisionDiff =
 keysBench =
     let multiplier = 1000
         trialData = setGenerator id multiplier
-        keysWrap d = logicFunction <| D.keys d
+        keysWrap d = D.keys d
     in  lazyLogic "keys" keysWrap trialData
 
 
 valuesBench =
     let multiplier = 1000
         trialData = setGenerator id multiplier
-        valuesWrap d = logicFunction <| D.values d
+        valuesWrap d = D.values d
     in  lazyLogic "values" valuesWrap trialData
 
 
 toListBench =
     let multiplier = 1000
         trialData = setGenerator id multiplier
-        toListWrap d = logicFunction <| D.toList d
+        toListWrap d = D.toList d
     in  lazyLogic "toList" toListWrap trialData
 
 
 fromListBench =
     let multiplier = 1000
         trialData = inputMap (\x -> zip [1..(multiplier * x)] [1..(multiplier * x)]) [1..10]
-        fromListWrap xs = logicFunction <| D.fromList xs
+        fromListWrap xs = D.fromList xs
     in  lazyLogic "fromList" fromListWrap trialData
 
 
@@ -184,7 +184,7 @@ fromListBench =
 mapBench =
     let multiplier = 1000
         trialData = setGenerator id multiplier
-        mapWrap xs = logicFunction <| D.map id xs
+        mapWrap xs = D.map id xs
     in lazyLogic "map" mapWrap trialData
 
 

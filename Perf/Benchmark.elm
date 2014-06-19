@@ -9,7 +9,7 @@ import Perf.Types (..)
     Note: If your function takes no parameters, it will be prematurely evalutated!
 -}
 logicFunction : a -> ()
-logicFunction function = always () <| function
+logicFunction function = always () function
 
 
 {- | Run a benchmark after executing a setup function. Occasionally your
@@ -18,10 +18,11 @@ logicFunction function = always () <| function
 
      logicSetup "Fibonacci" fibbDB (logicFunction fib) [30..35]
 -}
-logicSetup : String -> [() -> b] -> (b -> a -> ()) -> [a] -> Benchmark
+logicSetup : String -> [() -> b] -> (b -> a -> c) -> [a] -> Benchmark
 logicSetup name setups function inputs =
   let thunk f (setupFunc,testInput) = \_ -> let input =  setupFunc ()
-                                           in  \_ -> f input testInput
+                                                muted x y = logicFunction (f x y)
+                                           in  \_ -> muted input testInput
   in  Logic name <| map (thunk function) <| zip setups inputs
 
 
@@ -43,10 +44,11 @@ inputMap f xs = map (\x _-> f x) xs
         manyEmpty i = logicFunction <| foldr (\_ _ -> Array.empty) Array.empty [1..i]
     in  lazyLogic "10 empty arrays" manyEmpty trials
 -}
-lazyLogic : String -> (a -> ()) -> [() -> a] -> Benchmark
+lazyLogic : String -> (a -> b) -> [() -> a] -> Benchmark
 lazyLogic name function lazyInput =
   let thunk f lazyInputFunction = \_ -> let input = lazyInputFunction ()
-                                        in  \_ -> f input
+                                            muted x = logicFunction (f x)
+                                        in  \_ -> muted input
   in Logic name <| map (thunk function) lazyInput
 
 
@@ -54,9 +56,10 @@ lazyLogic name function lazyInput =
  
     logic "factorial" fact [1..9]
 -}
-logic : String -> (a -> ()) -> [a] -> Benchmark
+logic : String -> (a -> b) -> [a] -> Benchmark
 logic name function inputs = 
-  let thunker f input = \_ _-> f input
+  let thunker f input = \_ -> let muted a = logicFunction (f a)
+                              in \_ -> muted input
   in  Logic name <| map (thunker function) inputs
 
 
