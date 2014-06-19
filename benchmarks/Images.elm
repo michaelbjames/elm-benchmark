@@ -2,6 +2,7 @@ module Main where
 
 import Perf.Runner (..)
 import Perf.Benchmark (..)
+import Perf.Types (..)
 
 imagePaths : [String]
 imagePaths = map (\x -> "images/" ++ show x ++ ".jpg") [1..12]

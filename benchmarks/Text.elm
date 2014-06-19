@@ -2,6 +2,7 @@ module Main where
 
 import Perf.Runner (..)
 import Perf.Benchmark (..)
+import Perf.Types (..)
 
 {-| Setup. These are some helpful functions
 -}
@@ -168,11 +169,11 @@ showmd : Benchmark
 showmd = staticRender "Markdown" md
 
 downsizing : Benchmark
-downsizing = render "Text.Height" (\x -> justified <| Text.height x copy)
+downsizing = render "Text.Height getting smaller" (\x -> justified <| Text.height x copy)
                 <| reverse [1..100]
 
 resizing : Benchmark
-resizing = render "Resizing Markdown" (\x -> width x md)
+resizing = render "Markdown fitting into a smaller width" (\x -> width x md)
                 <| reverse (map (\x -> x*5) [1..100])
 
 
@@ -185,7 +186,7 @@ stylespin = let flipflopper i text = case i `mod` 2 of
                                      0 -> monospace text
                                      1 -> typeface ["sans-serif"] text
                 spinner times = leftAligned <| foldr flipflopper copy [1..times]
-            in  render "Style Spin" spinner (map (\x -> x*100) [1..100])
+            in  render "More and more style spins" spinner (map (\x -> x*100) [1..100])
 
 
 longStrings : Benchmark
@@ -193,7 +194,7 @@ longStrings = let lengths = (map (\x -> x*100)[1..100])
                   string n = foldr (\_ a -> "a" ++ a) "a" [1..n]
                   --string n = show <| repeat n 'a'
                   fit n string = width n <| plainText string
-              in  render "Long Strings" (fit 800) (map string lengths)
+              in  render "Longer and longer strings" (fit 800) (map string lengths)
 
 benchmarks : [Benchmark]
 benchmarks = [ showmd
