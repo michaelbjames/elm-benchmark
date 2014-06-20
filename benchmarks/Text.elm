@@ -65,16 +65,30 @@ changingTypesBetweenMarkdown =
     in  [ render "Changing types of elements betweens static markdown" display trialData
         , render "Changing types of elements no markdown" id trialData ]
 
+duplicateMd =
+    let flipFlop n = case n `mod` 2 of
+        0 -> md1
+        1 -> md3
+    in render "Switching between logically identical md blocks" flipFlop [1..20]
+
+changingMd =
+    let trialData = foldr (\_ md -> md ++ [md1,md2,md4] ) [] [1..5]
+    in  render "Changing markdown blocks" id trialData
+
 benchmarks : [Benchmark]
 benchmarks = [ showmd
              , downsizing
              , resizing
              , stylespin
              , longStrings
+             , textBetweenMarkdown
+             , duplicateMd
+             , changingMd
              ]
+             ++ changingTypesBetweenMarkdown
 
 main : Signal Element
-main = run <| [textBetweenMarkdown] ++ changingTypesBetweenMarkdown
+main = run [changingMd]
 
 
 
@@ -130,6 +144,58 @@ et Stygius tibia laevaque tempora coniunx nequiquam cur animos velle in.
 Laedor **caelo annos sunt** timemus; mea non Cyllaron, videres! Pictis si tamen
 motaeque amantem **tuas haec compescuit**, mihi candida? Pallada hasta Themis
 pictis memor non homines potest, male nuribusque area tendentemque illo, quid?
+
+|]
+
+md3 : Element
+md3 = [markdown|
+
+# Markdown Support
+
+Elm has native markdown support, making it easy to create complex
+text elements. You can easily make:
+
+  - Headers
+  - [Links](/)
+  - Images
+  - **Bold**, *italic*, and `monospaced` text
+  - Lists (numbered, nested, multi-paragraph bullets)
+
+It all feels quite natural to type. For more information on Markdown,
+see [this site](http://daringfireball.net/projects/markdown/).
+
+|]
+
+md4 : Element
+md4 = [markdown|
+
+# Markdown Support
+
+Elm has nwn support, making it easy to create complex
+text elements. You can easily make:
+
+  - Headers
+  - [Liks](/)
+  - Imag
+  - *Bolditc*, and `monospaced` text
+  - Lists (numbered, nested, multi-paragraph bullets)
+
+It all feels quite natural to type. For more information on Markdown,
+see [this site](http://daringfireball.net/projects/markdown/).
+
+# Markdown Support
+
+Elm has nwn support, making it easy to create complex
+text elements. You can easily make:
+
+  - Headers
+  - [Liks](/)
+  - Imag
+  - *Bolditc*, and `monospaced` text
+  - Lists (numbered, nested, multi-paragraph bullets)
+
+It all feels quite natural to type. For more information on Markdown,
+see [this site](http://daringfireball.net/projects/markdown/).
 
 |]
 

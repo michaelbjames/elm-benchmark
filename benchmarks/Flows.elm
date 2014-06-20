@@ -9,7 +9,7 @@ imagePaths : [String]
 imagePaths = map (\x -> "images/" ++ show x ++ ".jpg") [1..12]
 
 directions : [Direction]
-directions = [up, down, left, right, inward, outward]
+directions = [up, left, down, right, inward, outward]
 
 intToCircle : Int -> Form
 intToCircle n = filled red <| circle <| toFloat n
@@ -81,6 +81,20 @@ flows : [Benchmark]
 flows = (foldr flowStep [] flowNames) ++ map flowLayers flowNames
 
 
+addingToFlow =
+    let trialData = map (\n -> repeat n sampleMarkdown) [1..20]
+    in  render "Start at 1 element, add 1 up to 20 total" (flow inward) trialData
+
+
+removingFromFlow =
+    let trialData = map (\n -> map asText [1..n]) <| reverse [1..20]
+    in  render "Start at 20 elements, remove 1 down to 1 total" (flow down) trialData
+
+
+flowSpin =
+    let trialData = foldr (\_ d -> d ++ directions) [] [1..5]
+    in  render "Spin 5 times" (\d -> flow d sampleContent) trialData
+
 
 {-
     Swapping elements in a flow
@@ -97,7 +111,7 @@ increasingSwapsBench =
 swapNElements =
     let baseState = sampleContent
         swap n = (reverse (take n baseState)) ++ (drop n baseState)
-        swaps = map swap [2..10]
+        swaps = map swap [1..10]
         trials = intersperse baseState swaps
     in  render "swapNElements" (flow down) trials
 
@@ -123,4 +137,4 @@ benchmarks = flows ++
              ]
 
 main : Signal Element
-main = run benchmarks
+main = run [removingFromFlow]
