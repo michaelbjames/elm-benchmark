@@ -88,7 +88,7 @@ benchmarks = [ showmd
              ++ changingTypesBetweenMarkdown
 
 main : Signal Element
-main = run [changingMd]
+main = run benchmarks
 
 
 

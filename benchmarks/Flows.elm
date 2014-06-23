@@ -83,7 +83,7 @@ flows = (foldr flowStep [] flowNames) ++ map flowLayers flowNames
 
 addingToFlow =
     let trialData = map (\n -> repeat n sampleMarkdown) [1..20]
-    in  render "Start at 1 element, add 1 up to 20 total" (flow inward) trialData
+    in  render "Start at 1 element, add 1 up to 20 total" (flow right) trialData
 
 
 removingFromFlow =
@@ -131,10 +131,13 @@ nestedFlowBench =
 
 benchmarks : [Benchmark]
 benchmarks = flows ++
-             [ increasingSwapsBench
+             [ addingToFlow
+             , removingFromFlow
+             , flowSpin 
+             , increasingSwapsBench
              , nestedFlowBench
              , swapNElements
              ]
 
 main : Signal Element
-main = run [removingFromFlow]
+main = run benchmarks
