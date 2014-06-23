@@ -1,8 +1,6 @@
 module Main where
 
-import Perf.Runner (..)
 import Perf.Benchmark (..)
-import Perf.Types (..)
 
 
 staticBenchs = [ staticRender "Left" <| leftAligned copy

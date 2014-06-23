@@ -1,8 +1,6 @@
 module Main where
 
-import Perf.Runner (..)
 import Perf.Benchmark (..)
-import Perf.Types (..)
 import Dict as D
 
 
