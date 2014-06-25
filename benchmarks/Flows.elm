@@ -52,6 +52,15 @@ tomatoes
 |]
 
 
+sampleColorSpacers =
+    let colors = [ darkRed, red, lightRed
+                 , darkOrange, orange, lightOrange
+                 , darkYellow, yellow, lightYellow
+                 , darkGreen, green, lightGreen
+                 , darkBlue, blue, lightBlue
+                 , darkPurple, purple, lightPurple ]
+    in  map (spacer 50 50 |> flip color) colors
+
 
 {-
     Add & Remove from a flow
@@ -107,7 +116,7 @@ increasingSwapsBench =
 
 
 swapNElements =
-    let baseState = sampleContent
+    let baseState = sampleColorSpacers
         swap n = (reverse (take n baseState)) ++ (drop n baseState)
         swaps = map swap [1..10]
         trials = intersperse baseState swaps

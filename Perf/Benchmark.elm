@@ -6,7 +6,6 @@ module Perf.Benchmark
     , renderSetup
     , lazyLogic
     , inputMap
-    , Benchmark
     , run
     ) where
 {-| Benchmarking harnesses to determine the speed your code runs at.
