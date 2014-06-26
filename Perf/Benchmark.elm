@@ -37,7 +37,7 @@ mute f = always () f
 {-| Internal function to create turnkey functions from a function and presaturations.
 This will come in handy for the lazyLogic benchmarks.
 
-    trials = inputMap (\x -> [1..(1000 * x)]) [1..10]
+      trials = inputMap (\x -> [1..(1000 * x)]) [1..10]
 -}
 inputMap : (a -> b) -> [a] -> [() -> b]
 inputMap f xs = map (\x -> \() -> f x) xs
@@ -82,7 +82,7 @@ render name function inputs =
 the benefits of diffing to speed things up, so it is mainly useful for
 assessing page load time.
 
-    staticRender "Markdown rendering" markdownBlock
+      staticRender "Markdown rendering" markdownBlock
 -}
 staticRender : String -> Element -> T.Benchmark
 staticRender name element = render name (\_ -> element) [()]
@@ -94,7 +94,7 @@ staticRender name element = render name (\_ -> element) [()]
 fed into the timed function. This will let you perform an operation required for
 the timed function that won’t be counted against the timed function.
 
-    logicSetup "Ackermann(fib(n),n)" fib [5..10] ackermann [5..10]
+      logicSetup "Ackermann(fib(n),n)" fib [5..10] ackermann [5..10]
 -}
 logicSetup : String -> (a -> b) -> [a] -> (b -> c -> d) -> [c] -> T.Benchmark
 logicSetup name setup setupInputs function inputs =
@@ -109,7 +109,7 @@ logicSetup name setup setupInputs function inputs =
 fed into the timed function. This will let you perform an operation required for
 the timed function that won’t be counted against the timed function.
 
-    renderSetup "Julia-Pan-Zoom-0-10" (juliaSetZoom) [0..10] panX [0..10]
+      renderSetup "Julia-Pan-Zoom-0-10" juliaSetZoom [0..10] panX [0..10]
 -}
 renderSetup : String -> (a -> b) -> [a] -> (b -> c -> Element) -> [c] -> T.Benchmark
 renderSetup name setup setupInputs function inputs =
@@ -125,11 +125,12 @@ as it is actually needed. This will fix many out-of-memory issues. Note
 that the list of inputs to the timed function are now themselves turnkey
 functions.
 
-    emptyBench =
-    let multiplier = 100000
-        trialFunction x = multiplier * x
-        manyEmpty i = foldr (\_ _ -> Array.empty) Array.empty [1..i]
-    in  lazyLogic "10 empty arrays" manyEmpty trialFunction [1..10]
+      emptyBench =
+          let multiplier = 100000
+              trialFunction x = multiplier * x
+              manyEmpty i = foldr (\_ _ -> Array.empty) Array.empty [1..i]
+          in
+              lazyLogic "10 empty arrays" manyEmpty trialFunction [1..10]
 -}
 lazyLogic : String -> (a -> b) -> (c -> a) -> [c] -> T.Benchmark
 lazyLogic name function lazyInputFunc inputs =
