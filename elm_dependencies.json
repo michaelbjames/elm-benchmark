@@ -1,14 +1,16 @@
 {
   "version" : "0.2.0",
-  "summary" : "Code benchmarking utility",
-  "description" : "Code snippet speed testing utility based on Elm-Test.",
+  "summary" : "Benchmarking for logic and rendering",
+  "description" : "Benchmark your project! This library lets you test the speed of your logic, data structures, and rendering code.",
   "license" : "BSD 3-clause",
   "repository" : "https://github.com/michaelbjames/elm-benchmark.git",
   "exposed-modules" :
     [ "Perf.Benchmark"
     , "Perf.Runner"
     ],
-  "native-modules" : [ "Perf.Native.Runner" ],
-  "elm-version" : "0.12.1",
+  "native-modules" :
+    [ "Perf.Native.Runner"
+    ],
+  "elm-version" : "0.12.3",
   "dependencies" : {}
 }
