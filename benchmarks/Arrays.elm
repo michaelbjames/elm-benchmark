@@ -1,59 +1,57 @@
 module Main where
 
-import Perf.Runner (..)
 import Perf.Benchmark (..)
-import Perf.Types (..)
 import Array
 
 
 emptyBench =
     let multiplier = 100000
-        trials = inputMap (\x -> multiplier * x) [1..10]
+        trialInput x = multiplier * x
         manyEmpty i = foldr (\_ _ -> Array.empty) Array.empty [1..i]
-    in  lazyLogic "empty arrays" manyEmpty trials
+    in  lazyLogic "empty arrays" manyEmpty trialInput [1..10]
 
 
 repeatBench =
     let multiplier = 1000000
-        trials = inputMap (\x-> multiplier * x) [1..10]
+        trialInput x = multiplier * x
         repeatWrap i = Array.repeat i ()
-    in  lazyLogic "repeat arrays" repeatWrap trials
+    in  lazyLogic "repeat arrays" repeatWrap trialInput [1..10]
 
 
 fromListBench =
     let multiplier = 1000000
-        trialData = inputMap (\x -> [1..(multiplier * x)]) [1..10]
+        trialData x = [1..(multiplier * x)]
         fromListWrap xs = Array.fromList xs
-    in  lazyLogic "fromLists" fromListWrap trialData
+    in  lazyLogic "fromLists" fromListWrap trialData [1..10]
 
 
 lengthBench =
     let multiplier = 1000000
-        trials = inputMap (\x -> Array.repeat (multiplier * x) () ) [1..10]
+        trials x = Array.repeat (multiplier * x) ()
         lengthWrap xs = Array.length xs
-    in  lazyLogic "Lengths" lengthWrap trials
+    in  lazyLogic "Lengths" lengthWrap trials [1..10]
 
 
 pushBench =
     let multiplier = 10000
-        trialData = inputMap (\x -> (x,Array.repeat (multiplier * x) 0 )) [1..10]
+        trialData x = (x,Array.repeat (multiplier * x) 0 )
         pushWrap (x,xs) = Array.push x xs
-    in  lazyLogic "Pushes" pushWrap trialData
+    in  lazyLogic "Pushes" pushWrap trialData [1..10]
 
 
 appendBench =
     let multiplier = 10000
-        trialData = inputMap (\x -> (Array.repeat (multiplier * (11-x)) 1,
-                         Array.repeat (multiplier * x) 0)) [1..10]
+        trialData x = (Array.repeat (multiplier * (11-x)) 1,
+                         Array.repeat (multiplier * x) 0)
         appendWrap (l,r) = Array.append l r
-    in  lazyLogic "Append of varying differences" appendWrap trialData
+    in  lazyLogic "Append of varying differences" appendWrap trialData [1..10]
 
 
 getBench =
     let multiplier = 100
-        trialData = inputMap (\x -> ((multiplier * x), Array.repeat (5 * multiplier) () )) [1..5]
+        trialData x = ((multiplier * x), Array.repeat (5 * multiplier) () )
         getWrap (position, array) = Array.get position array
-    in  lazyLogic "Get at different positions" getWrap trialData
+    in  lazyLogic "Get at different positions" getWrap trialData [1..5]
 
 
 sliceBench =
@@ -66,33 +64,33 @@ sliceBench =
 
 toListBench =
     let multiplier = 1000
-        trialData = inputMap (\x -> Array.repeat (multiplier * x) () ) [1..10]
+        trialData x = Array.repeat (multiplier * x) ()
         toListWrap array = Array.toList
-    in  lazyLogic "toList" toListWrap trialData
+    in  lazyLogic "toList" toListWrap trialData [1..10]
 
 
 mapBench =
     let multiplier = 1000
         toyFunction = id
-        trialData = inputMap (\x -> Array.repeat (multiplier * x) () ) [1..10]
+        trialData x = Array.repeat (multiplier * x) ()
         mapWrap array = Array.map toyFunction array
-    in  lazyLogic "map" mapWrap trialData
+    in  lazyLogic "map" mapWrap trialData [1..10]
 
 
 foldlBench =
     let multiplier = 1000
         toyFunction _ _ = ()
-        trialData = inputMap (\x -> Array.repeat (multiplier * x) () ) [1..10]
+        trialData x = Array.repeat (multiplier * x) ()
         foldlWrap array = Array.foldl toyFunction () array
-    in  lazyLogic "foldl" foldlWrap trialData
+    in  lazyLogic "foldl" foldlWrap trialData [1..10]
 
 
 foldrBench =
     let multiplier = 1000
         toyFunction _ _ = ()
-        trialData = inputMap (\x -> Array.repeat (multiplier * x) () ) [1..10]
+        trialData x = Array.repeat (multiplier * x) ()
         foldrWrap array = Array.foldr toyFunction () array
-    in  lazyLogic "foldr" foldrWrap trialData
+    in  lazyLogic "foldr" foldrWrap trialData [1..10]
 
 
 

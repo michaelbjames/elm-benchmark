@@ -1,15 +1,16 @@
 module Main where
 
-import Perf.Runner (..)
 import Perf.Benchmark (..)
-import Perf.Types (..)
 import Dict as D
 
 
 -- Convenience function for our set functions
-setGenerator : ([number] -> [comparable]) -> number -> [() -> D.Dict comparable number]
+--setGenerator : ([number] -> [comparable]) -> number -> [() -> D.Dict comparable number]
 setGenerator arrayModification multiplier =
-    inputMap D.fromList <| map (\x -> zip (arrayModification [1..(multiplier * x)])
+    map (\x -> zip (arrayModification [1..(multiplier * x)])
+        [1..(multiplier * x)]) [1..10]
+
+dictList multiplier = map (\x -> zip ([1..(multiplier * x)])
                           [1..(multiplier * x)]) [1..10]
 
 {-
@@ -18,22 +19,21 @@ setGenerator arrayModification multiplier =
 
 insertBench =
     let multiplier = 1000
-        trialData = inputMap (\x -> [1..(multiplier * x)]) [1..10]
+        trialData x = [1..(multiplier * x)]
         insertWrap kvs =  foldr (\kv d -> D.insert kv kv d) D.empty kvs
-    in  lazyLogic "insert" insertWrap trialData
+    in  lazyLogic "insert" insertWrap trialData [1..10]
 
 
 -- Point of discussion: what percent of the dictionary should we update?
 updateBench =
     let dictSize = 1000
         updates = 200
-        trialData = inputMap D.fromList
-                  <| map (\x -> zip [1..dictSize] [1..dictSize]) [1..10]
+        listDictionary = map (\x -> zip [1..dictSize] [1..dictSize]) [1..10]
         updateFunction v = case v of
                             Just v -> Just (v + 1)
                             Nothing -> Nothing
         updateWrap dict = foldr (\x d -> D.update x updateFunction d) dict [1..updates]
-    in  lazyLogic "update" updateWrap trialData
+    in  lazyLogic "update" updateWrap D.fromList listDictionary
 
 
 -- No variable changes between runs. However from initial data, the first couple
@@ -41,34 +41,33 @@ updateBench =
 removeBench =
     let dictSize = 1000
         removes = 200
-        trialData = inputMap D.fromList
-                  <| map (\_ -> zip [1..dictSize] [1..dictSize]) [1..10]
+        listDictionary = map (\_ -> zip [1..dictSize] [1..dictSize]) [1..10]
         removeWrap dict = foldr (\x d-> D.remove x d) dict [1..removes]
-    in  lazyLogic "remove" removeWrap trialData
+    in  lazyLogic "remove" removeWrap D.fromList listDictionary
 
 
 isMemberBench =
     let multiplier = 1000
         trials = 50
-        trialData = setGenerator id multiplier
+        listDictionary = dictList multiplier
         isMemberWrap d = map (\x -> D.member x d) [1..trials]
-    in  lazyLogic "isMember" isMemberWrap trialData
+    in  lazyLogic "isMember" isMemberWrap D.fromList listDictionary
 
 
 isNotMemberBench =
     let multiplier = 1000
         trials = 200
-        trialData = setGenerator id multiplier
+        listDictionary = dictList multiplier
         isNotMemberWrap d = map (\x -> D.member (x-trials) d) [1..trials]
-    in  lazyLogic "isNotMember" isNotMemberWrap trialData
+    in  lazyLogic "isNotMember" isNotMemberWrap D.fromList listDictionary
 
 
 getBench =
     let multiplier = 1000
         gets = 500
-        trialData = setGenerator id multiplier
+        listDictionary = dictList multiplier
         getWrap dict = map (\i -> D.get i dict) [1..gets]
-    in  lazyLogic "get" getWrap trialData
+    in  lazyLogic "get" getWrap D.fromList listDictionary
 
 
 
@@ -83,9 +82,9 @@ noCollisionUnion =
         oddArray xs = map (\x -> x + 1) <| evenArray xs
         leftSets = setGenerator evenArray multiplier
         rightSets = setGenerator oddArray multiplier
-        trialData = inputMap (\(l,r) -> (l(),r())) <| zip leftSets rightSets
+        trialData (l,r) = (D.fromList l , D.fromList r)
         unionWrap (l,r) = D.union l r
-    in  lazyLogic "noCollisionUnion" unionWrap trialData
+    in  lazyLogic "noCollisionUnion" unionWrap trialData (zip leftSets rightSets)
 
 
 halfCollisionUnion =
@@ -94,9 +93,9 @@ halfCollisionUnion =
         times4 xs = map (\x -> x * 4) xs
         leftSets = setGenerator times2 multiplier
         rightSets = setGenerator times4 multiplier
-        trialData = inputMap (\(l,r) -> (l(),r())) <| zip leftSets rightSets
+        trialData (l,r) = (D.fromList l , D.fromList r)
         unionWrap (l,r) = D.union l r
-    in  lazyLogic "halfCollisionUnion" unionWrap trialData
+    in  lazyLogic "halfCollisionUnion" unionWrap trialData (zip leftSets rightSets)
 
 
 noCollisionIntersect =
@@ -105,9 +104,9 @@ noCollisionIntersect =
         oddArray xs = map (\x -> x + 1) <| evenArray xs
         leftSets = setGenerator evenArray multiplier
         rightSets = setGenerator oddArray multiplier
-        trialData = inputMap (\(l,r) -> (l(),r())) <| zip leftSets rightSets
+        trialData (l,r) = (D.fromList l , D.fromList r)
         intersectWrap (l,r) = D.intersect l r
-    in  lazyLogic "noCollisionIntersect" intersectWrap trialData
+    in  lazyLogic "noCollisionIntersect" intersectWrap trialData (zip leftSets rightSets)
 
 
 halfCollisionIntersect =
@@ -116,9 +115,9 @@ halfCollisionIntersect =
         times4 xs = map (\x -> x * 4) xs
         leftSets = setGenerator times2 multiplier
         rightSets = setGenerator times4 multiplier
-        trialData = inputMap (\(l,r) -> (l(),r())) <| zip leftSets rightSets
+        trialData (l,r) = (D.fromList l , D.fromList r)
         intersectWrap (l,r) = D.intersect l r
-    in  lazyLogic "halfCollisionIntersect" intersectWrap trialData
+    in  lazyLogic "halfCollisionIntersect" intersectWrap trialData (zip leftSets rightSets)
 
 
 noCollisionDiff =
@@ -127,9 +126,9 @@ noCollisionDiff =
         oddArray xs = map (\x -> x + 1) <| evenArray xs
         leftSets = setGenerator evenArray multiplier
         rightSets = setGenerator oddArray multiplier
-        trialData = inputMap (\(l,r) -> (l(),r())) <| zip leftSets rightSets
+        trialData (l,r) = (D.fromList l , D.fromList r)
         diffWrap (l,r) = D.diff l r
-    in  lazyLogic "noCollisionDiff" diffWrap trialData
+    in  lazyLogic "noCollisionDiff" diffWrap trialData (zip leftSets rightSets)
 
 
 halfCollisionDiff =
@@ -138,9 +137,9 @@ halfCollisionDiff =
         times4 xs = map (\x -> x * 4) xs
         leftSets = setGenerator times2 multiplier
         rightSets = setGenerator times4 multiplier
-        trialData = inputMap (\(l,r) -> (l(),r())) <| zip leftSets rightSets
+        trialData (l,r) = (D.fromList l , D.fromList r)
         diffWrap (l,r) = D.diff l r
-    in  lazyLogic "halfCollisionDiff" diffWrap trialData
+    in  lazyLogic "halfCollisionDiff" diffWrap trialData (zip leftSets rightSets)
 
 
 
@@ -150,30 +149,30 @@ halfCollisionDiff =
 
 keysBench =
     let multiplier = 1000
-        trialData = setGenerator id multiplier
+        listDictionary = dictList multiplier
         keysWrap d = D.keys d
-    in  lazyLogic "keys" keysWrap trialData
+    in  lazyLogic "keys" keysWrap D.fromList listDictionary
 
 
 valuesBench =
     let multiplier = 1000
-        trialData = setGenerator id multiplier
+        listDictionary = dictList multiplier
         valuesWrap d = D.values d
-    in  lazyLogic "values" valuesWrap trialData
+    in  lazyLogic "values" valuesWrap D.fromList listDictionary
 
 
 toListBench =
     let multiplier = 1000
-        trialData = setGenerator id multiplier
+        listDictionary = dictList multiplier
         toListWrap d = D.toList d
-    in  lazyLogic "toList" toListWrap trialData
+    in  lazyLogic "toList" toListWrap D.fromList listDictionary
 
 
 fromListBench =
     let multiplier = 1000
-        trialData = inputMap (\x -> zip [1..(multiplier * x)] [1..(multiplier * x)]) [1..10]
+        trialData x = zip [1..(multiplier * x)] [1..(multiplier * x)]
         fromListWrap xs = D.fromList xs
-    in  lazyLogic "fromList" fromListWrap trialData
+    in  lazyLogic "fromList" fromListWrap trialData [1..10]
 
 
 
@@ -183,9 +182,9 @@ fromListBench =
 
 mapBench =
     let multiplier = 1000
-        trialData = setGenerator id multiplier
+        listDictionary = dictList multiplier
         mapWrap xs = D.map id xs
-    in lazyLogic "map" mapWrap trialData
+    in lazyLogic "map" mapWrap D.fromList listDictionary
 
 
 

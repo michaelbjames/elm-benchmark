@@ -2,7 +2,6 @@ module Perf.Runner
     ( run
     ) where
 
-import Perf.Benchmark (..)
 import Perf.Types (..)
 import Native.Runner
 import Either (..)
@@ -22,7 +21,7 @@ condenseEach n f xs = case xs of
     ys -> f (take n ys) :: condenseEach n f (drop n ys)
 
 {-| Implicit assumption that we've got the same type of result.
-    They should all have the same name and the same number of elements in .times
+They should all have the same name and the same number of elements in .times
 -}
 averageResults : [Result] -> Result
 averageResults results =
@@ -33,6 +32,13 @@ averageResults results =
         avgs = map (\x -> toFloat (round ((x / toFloat n) * 10))/10 ) summed
     in { name=(head results).name, times=avgs }
 
+
+{-| For each benchmark, run it 10 times in a row and average the times. If the
+benchmark needs to render something, it goes to screen. Once the benchmarks are
+completed, they are displayed linearly in a graph
+    
+    main = run benchmarks
+-}
 run : [Benchmark] -> Signal Element
 run bms =
     let repeatedBms = duplicateEach numRepeats bms
