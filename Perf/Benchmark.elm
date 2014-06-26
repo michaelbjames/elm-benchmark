@@ -5,7 +5,6 @@ module Perf.Benchmark
     , logicSetup
     , renderSetup
     , lazyLogic
-    , inputMap
     , Benchmark
     , run
     ) where
@@ -34,6 +33,16 @@ function's return type.
 -}
 mute : a -> ()
 mute f = always () f
+
+{-| Internal function to create turnkey functions from a function and presaturations.
+This will come in handy for the lazyLogic benchmarks.
+
+    trials = inputMap (\x -> [1..(1000 * x)]) [1..10]
+-}
+inputMap : (a -> b) -> [a] -> [() -> b]
+inputMap f xs = map (\x _-> f x) xs 
+
+
 
 {-| Run a function with a range of different values, benchmarking each separately.
  
@@ -74,13 +83,14 @@ staticRender name element = render name (\_ -> element) [()]
 fed into the timed function. This will let you perform an operation required for
 the timed function that won’t be counted against the timed function.
 
-    logicSetup "Ackermann(fib(n),n)" fibs5to10 ackermann [5..10]
+    logicSetup "Ackermann(fib(n),n)" fib [5..10] ackermann [5..10]
 -}
-logicSetup : String -> [() -> b] -> (b -> a -> c) -> [a] -> T.Benchmark
-logicSetup name setups function inputs =
+logicSetup : String -> (a -> b) -> [a] -> (b -> c -> d) -> [c] -> T.Benchmark
+logicSetup name setup setupInputs function inputs =
   let thunk f (setupFunc,testInput) = \_ -> let input =  setupFunc ()
                                                 muted x y = mute (f x y)
                                            in  \_ -> muted input testInput
+      setups = inputMap setup setupInputs
   in  T.Logic name <| map (thunk function) <| zip setups inputs
 
 
@@ -88,12 +98,13 @@ logicSetup name setups function inputs =
 fed into the timed function. This will let you perform an operation required for
 the timed function that won’t be counted against the timed function.
 
-    renderSetup "Julia-Pan-Zoom-0-10" (juliaSetZoom0to10) panX [0..10]
+    renderSetup "Julia-Pan-Zoom-0-10" (juliaSetZoom) [0..10] panX [0..10]
 -}
-renderSetup : String -> [() -> b] -> (b -> a -> Element) -> [a] -> T.Benchmark
-renderSetup name setups function inputs =
+renderSetup : String -> (a -> b) -> [a] -> (b -> c -> Element) -> [c] -> T.Benchmark
+renderSetup name setup setupInputs function inputs =
   let thunk f (setupFunc,testInput) = \_ -> let input =  setupFunc ()
                                            in  \_ -> f input testInput
+      setups = inputMap setup setupInputs
   in  T.Render name <| map (thunk function) <| zip setups inputs
 
 
@@ -104,24 +115,14 @@ that the list of inputs to the timed function are now themselves turnkey
 functions.
 
     emptyBench =
-        let multiplier = 100000
-            trials = inputMap (\x -> multiplier * x) [1..10]
-            manyEmpty i = foldr (\_ _ -> Array.empty) Array.empty [1..i]
-        in  lazyLogic "10 empty arrays" manyEmpty trials
+    let multiplier = 100000
+        trialFunction x = multiplier * x
+        manyEmpty i = foldr (\_ _ -> Array.empty) Array.empty [1..i]
+    in  lazyLogic "10 empty arrays" manyEmpty trialFunction [1..10]
 -}
-lazyLogic : String -> (a -> b) -> [() -> a] -> T.Benchmark
-lazyLogic name function lazyInput =
+lazyLogic : String -> (a -> b) -> (c -> a) -> [c] -> T.Benchmark
+lazyLogic name function lazyInputFunc inputs =
   let thunk f lazyInputFunction = \_ -> let input = lazyInputFunction ()
                                             muted x = mute (f x)
                                         in  \_ -> muted input
-  in T.Logic name <| map (thunk function) lazyInput
-
-
-{-| Create turnkey functions from a function and presaturations.
-This will come in handy for the lazyLogic benchmarks.
-
-    trials = inputMap (\x -> [1..(1000 * x)]) [1..10]
--}
-inputMap : (a -> b) -> [a] -> [() -> b]
-inputMap f xs = map (\x _-> f x) xs 
-
+  in T.Logic name <| map (thunk function) (inputMap lazyInputFunc inputs)

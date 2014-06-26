@@ -54,13 +54,13 @@ Let's suppose you've got a **huge** logical test. You're testing something that 
 emptyArray =
     let multiplier = 100000
         trials : [() -> Int]
-        trials = inputMap (\x -> multiplier * x) [1..10]
+        trials x = multiplier * x
         -- We just need to make the arrays, not keep them
         manyEmpty : Int -> Array
         manyEmpty i = foldr (\_ _ -> Array.empty) Array.empty [1..i]
-    in  lazyLogic "[1..10] * 100000 empty arrays" manyEmpty trials
+    in  lazyLogic "[1..10] * 100000 empty arrays" manyEmpty trials [1..10]
 ```
-`lazyLogic` here is of type `String -> (a -> b) -> [() -> a] -> Benchmark`
+`lazyLogic` here is of type `String -> (a -> b) -> (c -> a) -> [c] -> Benchmark`
 
 
 We can also run setup in a different way that is more similar to JSPerf's setup phase:
@@ -72,14 +72,8 @@ logicalSetup =
         appender xs x = x :: xs
     in  logicSetup "add 10..1 to (1000 * [1..10])" setup appender trials
 ```
-Note that logicSetup is of type `String -> [() -> b] -> (b -> a -> c) -> [a] -> Benchmark`.
+Note that logicSetup is of type `String -> (a -> b) -> [a] -> (b -> c -> d) -> [c] -> Benchmark`.
 This works in the same way for rendering, too!
 ```haskell
-renderSetup : String -> [() -> b] -> (b -> a -> Element) -> [a] -> Benchmark
+renderSetup : String -> (a -> b) -> [a] -> (b -> c -> Element) -> [c] -> Benchmark
 ```
-
-
-###Changelog
-1. Removed `logicFunction: a-> ()`.
-1. Control over imports. End user only needs to import Perf.Benchmark 
-1. Added more rendering benchmarks to Flow and Text
