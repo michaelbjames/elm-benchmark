@@ -1,7 +1,7 @@
 module Perf.Benchmark 
     ( logic
     , render
-    , staticRender
+    , renderStatic
     , logicSetup
     , renderSetup
     , lazyLogic
@@ -11,7 +11,7 @@ module Perf.Benchmark
 {-| 
 
 # Create
-@docs logic, render, staticRender
+@docs logic, render, renderStatic
 
 # Memory-smart logic functions
 @docs lazyLogic
@@ -82,10 +82,10 @@ render name function inputs =
 the benefits of diffing to speed things up, so it is mainly useful for
 assessing page load time.
 
-      staticRender "Markdown rendering" markdownBlock
+      renderStatic "Markdown rendering" markdownBlock
 -}
-staticRender : String -> Element -> T.Benchmark
-staticRender name element = render name (\_ -> element) [()]
+renderStatic : String -> Element -> T.Benchmark
+renderStatic name element = render name (\_ -> element) [()]
 
 
 
