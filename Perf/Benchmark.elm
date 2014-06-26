@@ -8,9 +8,9 @@ module Perf.Benchmark
     , Benchmark
     , run
     ) where
-{-| Benchmarking harnesses to determine the speed your code runs at.
+{-| 
 
-# Benchmark constructors
+# Create
 @docs logic, render, staticRender
 
 # Memory-smart logic functions
@@ -40,13 +40,15 @@ This will come in handy for the lazyLogic benchmarks.
     trials = inputMap (\x -> [1..(1000 * x)]) [1..10]
 -}
 inputMap : (a -> b) -> [a] -> [() -> b]
-inputMap f xs = map (\x _-> f x) xs 
+inputMap f xs = map (\x -> \() -> f x) xs
 
 
 
-{-| Run a function with a range of different values, benchmarking each separately.
+{-| Create a logic benchmark, running a function on many different inputs.
+You provide a name, a function, and a list of input values. After the benchmark
+suite runs, you will see results for each input all labeled with the given name.
  
-    logic "factorial" fact [1..9]
+      logic "Date Parsing" parseDate [ "1/2/1990", "1 Feb 1990", "February 1, 1990" ]
 -}
 logic : String -> (a -> b) -> [a] -> T.Benchmark
 logic name function inputs = 
@@ -55,11 +57,20 @@ logic name function inputs =
   in  T.Logic name <| map (noSetup function) inputs
 
 
-{-| Record a sequence of states and feed them to your render functions.
-This will test the performance of *updating* the view for a given sequence
-of events.
+{-| Create a rendering benchmark, rendering a sequence of states. You provide a
+name, a rendering function, and a sequence of states. Running this benchmark
+measures the whole rendering pipeline.
  
-    render "graph" graph [ [(1,1),(2,2),(3,3)], [(1,1),(2,3),(3,4)], [(1,1),(3,2),(4,4)] ]
+      render "Profile" userProfile [ { user=123, friends=0 }
+                                   , { user=123, friends=1 }
+                                   , { user=123, friends=2 }
+                                   , { user=123, friends=1 }
+                                   ]
+
+The sequence of states really is a *sequence*. They are run in order, so you can
+see how well Elm's diffing engine does given the particular sequence you give it.
+It may help to record a sequence of states directly from your project. Better to
+use real data instead of making it up!
 -}
 render : String -> (a -> Element) -> [a] -> T.Benchmark
 render name function inputs =
