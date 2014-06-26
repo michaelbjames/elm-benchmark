@@ -14,7 +14,7 @@ module Perf.Benchmark
 @docs logic, render, staticRender
 
 # Memory-smart logic functions
-@docs lazyLogic, inputMap
+@docs lazyLogic
 
 # Benchmarks with setup
 @docs logicSetup, renderSetup
