@@ -120,7 +120,7 @@ swapNElements =
         swap n = (reverse (take n baseState)) ++ (drop n baseState)
         swaps = map swap [1..10]
         trials = intersperse baseState swaps
-    in  render "swapNElements" (flow down) trials
+    in  render "swapNElements" (flow right) trials
 
 {-
     Nested flows
@@ -136,6 +136,20 @@ nestedFlowBench =
     in  render "sprialNestBench" sprialNest trials
 
 
+relativePositionReflow =
+    let index = 16
+        baseStateL = take index sampleContent
+        baseStateR = drop (index + 1) sampleContent
+        middleElement = head <| drop index sampleContent
+        otherType = collage 50 100 [circle 25 |> filled red |> move (0,0)]
+        middles = (intersperse otherType <| repeat 5 middleElement)
+        trialData = map (\x -> baseStateL ++ [x] ++ baseStateR) middles
+    in  render "Swapping element of the same dimesions for a different type"
+            (flow down) trialData
+
+
+
+
 benchmarks : [Benchmark]
 benchmarks = flows ++
              [ addingToFlow
@@ -144,6 +158,7 @@ benchmarks = flows ++
              , increasingSwapsBench
              , nestedFlowBench
              , swapNElements
+             , relativePositionReflow
              ]
 
 main : Signal Element
