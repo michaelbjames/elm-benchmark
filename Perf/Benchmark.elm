@@ -1,20 +1,20 @@
 module Perf.Benchmark 
     ( logic
     , render
-    , staticRender
+    , renderStatic
     , logicSetup
     , renderSetup
     , lazyLogic
     , Benchmark
     , run
     ) where
-{-| Benchmarking harnesses to determine the speed your code runs at.
+{-| 
 
-# Benchmark constructors
-@docs logic, render, staticRender
+# Create
+@docs logic, render, renderStatic
 
 # Memory-smart logic functions
-@docs lazyLogic, inputMap
+@docs lazyLogic
 
 # Benchmarks with setup
 @docs logicSetup, renderSetup
@@ -37,16 +37,18 @@ mute f = always () f
 {-| Internal function to create turnkey functions from a function and presaturations.
 This will come in handy for the lazyLogic benchmarks.
 
-    trials = inputMap (\x -> [1..(1000 * x)]) [1..10]
+      trials = inputMap (\x -> [1..(1000 * x)]) [1..10]
 -}
 inputMap : (a -> b) -> [a] -> [() -> b]
-inputMap f xs = map (\x _-> f x) xs 
+inputMap f xs = map (\x -> \() -> f x) xs
 
 
 
-{-| Run a function with a range of different values, benchmarking each separately.
+{-| Create a logic benchmark, running a function on many different inputs.
+You provide a name, a function, and a list of input values. After the benchmark
+suite runs, you will see results for each input all labeled with the given name.
  
-    logic "factorial" fact [1..9]
+      logic "Date Parsing" parseDate [ "1/2/1990", "1 Feb 1990", "February 1, 1990" ]
 -}
 logic : String -> (a -> b) -> [a] -> T.Benchmark
 logic name function inputs = 
@@ -55,11 +57,20 @@ logic name function inputs =
   in  T.Logic name <| map (noSetup function) inputs
 
 
-{-| Record a sequence of states and feed them to your render functions.
-This will test the performance of *updating* the view for a given sequence
-of events.
+{-| Create a rendering benchmark, rendering a sequence of states. You provide a
+name, a rendering function, and a sequence of states. Running this benchmark
+measures the whole rendering pipeline.
  
-    render "graph" graph [ [(1,1),(2,2),(3,3)], [(1,1),(2,3),(3,4)], [(1,1),(3,2),(4,4)] ]
+      render "Profile" userProfile [ { user=123, friends=0 }
+                                   , { user=123, friends=1 }
+                                   , { user=123, friends=2 }
+                                   , { user=123, friends=1 }
+                                   ]
+
+The sequence of states really is a *sequence*. They are run in order, so you can
+see how well Elm's diffing engine does given the particular sequence you give it.
+It may help to record a sequence of states directly from your project. Better to
+use real data instead of making it up!
 -}
 render : String -> (a -> Element) -> [a] -> T.Benchmark
 render name function inputs =
@@ -71,10 +82,10 @@ render name function inputs =
 the benefits of diffing to speed things up, so it is mainly useful for
 assessing page load time.
 
-    staticRender "Markdown rendering" markdownBlock
+      renderStatic "Markdown rendering" markdownBlock
 -}
-staticRender : String -> Element -> T.Benchmark
-staticRender name element = render name (\_ -> element) [()]
+renderStatic : String -> Element -> T.Benchmark
+renderStatic name element = render name (\_ -> element) [()]
 
 
 
@@ -83,7 +94,7 @@ staticRender name element = render name (\_ -> element) [()]
 fed into the timed function. This will let you perform an operation required for
 the timed function that won’t be counted against the timed function.
 
-    logicSetup "Ackermann(fib(n),n)" fib [5..10] ackermann [5..10]
+      logicSetup "Ackermann(fib(n),n)" fib [5..10] ackermann [5..10]
 -}
 logicSetup : String -> (a -> b) -> [a] -> (b -> c -> d) -> [c] -> T.Benchmark
 logicSetup name setup setupInputs function inputs =
@@ -98,7 +109,7 @@ logicSetup name setup setupInputs function inputs =
 fed into the timed function. This will let you perform an operation required for
 the timed function that won’t be counted against the timed function.
 
-    renderSetup "Julia-Pan-Zoom-0-10" (juliaSetZoom) [0..10] panX [0..10]
+      renderSetup "Julia-Pan-Zoom-0-10" juliaSetZoom [0..10] panX [0..10]
 -}
 renderSetup : String -> (a -> b) -> [a] -> (b -> c -> Element) -> [c] -> T.Benchmark
 renderSetup name setup setupInputs function inputs =
@@ -114,11 +125,12 @@ as it is actually needed. This will fix many out-of-memory issues. Note
 that the list of inputs to the timed function are now themselves turnkey
 functions.
 
-    emptyBench =
-    let multiplier = 100000
-        trialFunction x = multiplier * x
-        manyEmpty i = foldr (\_ _ -> Array.empty) Array.empty [1..i]
-    in  lazyLogic "10 empty arrays" manyEmpty trialFunction [1..10]
+      emptyBench =
+          let multiplier = 100000
+              trialFunction x = multiplier * x
+              manyEmpty i = foldr (\_ _ -> Array.empty) Array.empty [1..i]
+          in
+              lazyLogic "10 empty arrays" manyEmpty trialFunction [1..10]
 -}
 lazyLogic : String -> (a -> b) -> (c -> a) -> [c] -> T.Benchmark
 lazyLogic name function lazyInputFunc inputs =
