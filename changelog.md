@@ -1,3 +1,14 @@
+### 0.2.1
+
+#### Notes
+    * Elm version requirement version bumped to `0.12.3`
+
+#### Improvements
+    * Better documentation
+
+#### Breaking Changes
+    * `staticRender` is now `renderStatic`
+
 ## 0.2.0
 
 #### Improvements

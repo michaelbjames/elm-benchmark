@@ -3,10 +3,10 @@ module Main where
 import Perf.Benchmark (..)
 
 
-staticBenchs = [ staticRender "Left" <| leftAligned copy
-               , staticRender "Right" <| rightAligned copy
-               , staticRender "Centered" <| centered copy
-               , staticRender "Justified" <| justified copy
+staticBenchs = [ renderStatic "Left" <| leftAligned copy
+               , renderStatic "Right" <| rightAligned copy
+               , renderStatic "Centered" <| centered copy
+               , renderStatic "Justified" <| justified copy
                ]
 
 spinningBenchs = [ render "alignment" (\f -> f copy) [ leftAligned
@@ -17,7 +17,7 @@ spinningBenchs = [ render "alignment" (\f -> f copy) [ leftAligned
 
 
 showmd : Benchmark
-showmd = staticRender "Markdown" md1
+showmd = renderStatic "Markdown" md1
 
 downsizing : Benchmark
 downsizing = render "Text.Height getting smaller" (\x -> justified <| Text.height x copy)

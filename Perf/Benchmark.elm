@@ -5,7 +5,6 @@ module Perf.Benchmark
     , logicSetup
     , renderSetup
     , lazyLogic
-    , Benchmark
     , run
     ) where
 {-| 
