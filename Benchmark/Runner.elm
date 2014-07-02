@@ -1,12 +1,13 @@
-module Runner
+module Benchmark.Runner
     ( run
     ) where
 
-import Types (..)
+import Benchmark.Types (..)
+import Benchmark.LineGraph (..)
 import Native.Runner
 import Either (..)
 import Window
-import LineGraph (..)
+
 
 numRepeats = 10
 

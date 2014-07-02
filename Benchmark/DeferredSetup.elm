@@ -12,7 +12,7 @@ Benchmarks for more specific purposes where the basic ones will not suffice
 @docs render
 -}
 
-import Types as T
+import Benchmark.Types as T
 
 -- Bindings from other files for a cleaner export
 type Benchmark = T.Benchmark

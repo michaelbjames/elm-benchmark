@@ -1,4 +1,4 @@
-module Types where
+module Benchmark.Types where
 
 type Result = { name:String, times:[Time] }
 

@@ -1,6 +1,6 @@
-module LineGraph (showResults) where
+module Benchmark.LineGraph (showResults) where
 
-import Types (..)
+import Benchmark.Types (..)
 
 type Coordinate = { x:Float, y:Float }
 

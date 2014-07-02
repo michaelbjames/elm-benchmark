@@ -15,8 +15,8 @@ Simple Benchmarking library
 
 -}
 
-import Types as T
-import Runner as R
+import Benchmark.Types as T
+import Benchmark.Runner as R
 
 -- Bindings from other files for a cleaner export
 type Benchmark = T.Benchmark

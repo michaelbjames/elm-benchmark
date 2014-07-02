@@ -7,6 +7,7 @@
 #### Improvements
     * Better documentation
     * Easier future additions with a module scheme (Benchmark/etc)
+    * Sheltered most files in Benchmark namespace
 
 #### Breaking Changes
     * `staticRender` is now `renderStatic`
