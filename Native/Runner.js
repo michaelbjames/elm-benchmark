@@ -28,7 +28,7 @@ Elm.Native.Runner.make = function(elm) {
     var Element    = Elm.Graphics.Element.make(elm);
     var Renderer   = ElmRuntime.Render.Element();
     var Dimensions = Elm.Native.Window.make(elm).dimensions;
-    var now        = function() {
+    function now() {
         // We get too many digits from accurate clocks. We only want one
         // extra digit. So we must multiply by 10, round, and divide again;
         // however, pesky floating point errors can occasionally cause the
@@ -74,8 +74,8 @@ Elm.Native.Runner.make = function(elm) {
         var results = [];
         var currentFunctions = ListUtils.toArray(bms[bmIndex]._1);
         if (currentFunctions.length < 1) {
-            console.log("One of your benchmarks didn't have any functions to\
-run. This is a fatal error.");
+            console.log('One of your benchmarks didn\'t have any functions to' +
+                        'run. This is a fatal error.');
             return;
         }
         var currentFunctionType = bms[bmIndex].ctor;
@@ -122,20 +122,11 @@ run. This is a fatal error.");
                        }
             }
             var element;
-            switch(currentFunctionType) {
-              case 'Logic':
-                  timeFunction(currentFunctions[index]);
-                  element = emptyElem;
-              break;
-
-              case 'Render':
-                  element = instrumentedElement(currentFunctions[index]);
-              break;
-
-              default:
-                  console.log("The impossible has happened. Please report this bug" +
-                              " to github.com/michaelbjames/elm-benchmark/issues.");
-              break;
+            if(currentFunctionType === 'Logic') {
+                timeFunction(currentFunctions[index]);
+                element = emptyElem;
+            } else { // Render
+                element = instrumentedElement(currentFunctions[index]);
             }
             index++;
             return { ctor : 'Left'
@@ -144,27 +135,18 @@ run. This is a fatal error.");
         }
 
         var bmBaseState;
-        switch(currentFunctionType) {
-            case 'Logic':
-                bmBaseState = { ctor : 'Left'
-                              , _0   : emptyElem
-                              }
-                setTimeout(function() {
-                    elm.notify(deltas.id, -1);
-                },100); // Need time for the fold to get hooked up
-            break;
-
-            case 'Render':
-                var elem = instrumentedElement(currentFunctions[index++]);
-                bmBaseState = { ctor : 'Left'
-                              , _0   : elem
-                              }
-            break;
-
-            default:
-                console.log("The impossible has happened. Please report this bug" +
-                            " to github.com/michaelbjames/elm-benchmark/issues.");
-            break;
+        if(currentFunctionType === 'Logic') {
+            bmBaseState = { ctor : 'Left'
+                          , _0   : emptyElem
+                          }
+            setTimeout(function() {
+                elm.notify(deltas.id, -1);
+            },100); // Need time for the fold to get hooked up
+        } else { // Render
+            var elem = instrumentedElement(currentFunctions[index++]);
+            bmBaseState = { ctor : 'Left'
+                          , _0   : elem
+                          }
         }
         var accumulation = A3( Signal.foldp, F2(bmStep), bmBaseState, deltas);
 
