@@ -37,29 +37,29 @@ Elm.Native.Runner.make = function(elm) {
     };
 
 
-    /* runMany : [Benchmark] -> Signal Either Element Time
-     |
-     | For rendering tests we have to be clever. We need an element to get to
-     | screen. We instrument the element such that it notifies our signal and
-     | consequently updates the foldp upon being rendered or updated.
-     | Thanks to evancz for the advice on this!
-     |
-     | For pure tests we still have to return an element, so it's blank. We
-     | also do not need this rendering trick as the functions are pure thunks.
-     | We asynchronously run the pure function while timing it. When it
-     | completes, it notifies the signal.
-     |
-     | When the signal is notified it recieves either a delta time or a
-     | timestamp, distinguished by the type of deltaObject. After it is
-     | appropriately placed in the results, the function grabs the next function
-     | in the current benchmark (either a logic or a view benchmark). If there
-     | are no more thunks left in the current benchmark, then the foldp goes on
-     | to the next set of functions. This continues until we run out of
-     | benchmarks at which point we display the results of all benchmarks.
-     |
-     | This is intentionally a monolithic function. The hope is to clean this
-     | up when we need more functionality and when more features have been
-     | added to Elm. It is possible that Commands will help.
+    /*  runMany : [Benchmark] -> Signal Either Element Time
+     * 
+     *  For rendering tests we have to be clever. We need an element to get to
+     *  screen. We instrument the element such that it notifies our signal and
+     *  consequently updates the foldp upon being rendered or updated.
+     *  Thanks to evancz for the advice on this!
+     * 
+     *  For pure tests we still have to return an element, so it's blank. We
+     *  also do not need this rendering trick as the functions are pure thunks.
+     *  We asynchronously run the pure function while timing it. When it
+     *  completes, it notifies the signal.
+     * 
+     *  When the signal is notified it recieves either a delta time or a
+     *  timestamp, distinguished by the type of deltaObject. After it is
+     *  appropriately placed in the results, the function grabs the next function
+     *  in the current benchmark (either a logic or a view benchmark). If there
+     *  are no more thunks left in the current benchmark, then the foldp goes on
+     *  to the next set of functions. This continues until we run out of
+     *  benchmarks at which point we display the results of all benchmarks.
+     * 
+     *  This is intentionally a monolithic function. The hope is to clean this
+     *  up when we need more functionality and when more features have been
+     *  added to Elm. It is possible that Commands will help.
      */
     function runMany(benchmarks){
         var bms = ListUtils.toArray(benchmarks);
