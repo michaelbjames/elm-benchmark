@@ -20,7 +20,6 @@ import Runner as R
 
 -- Bindings from other files for a cleaner export
 type Benchmark = T.Benchmark
-run = R.run
 
 
 {-| Create a logic benchmark, running a function on many different inputs.
@@ -29,7 +28,7 @@ suite runs, you will see results for each input all labeled with the given name.
  
       logic "Date Parsing" parseDate [ "1/2/1990", "1 Feb 1990", "February 1, 1990" ]
 -}
-logic : String -> (a -> b) -> [a] -> T.Benchmark
+logic : String -> (input -> output) -> [input] -> Benchmark
 logic name function inputs = 
   let noSetup f input = \_ -> let muted a = always () (f a)
                               in \_ -> muted input
@@ -51,7 +50,7 @@ see how well Elm's diffing engine does given the particular sequence you give it
 It may help to record a sequence of states directly from your project. Better to
 use real data instead of making it up!
 -}
-render : String -> (a -> Element) -> [a] -> T.Benchmark
+render : String -> (input -> Element) -> [input] -> Benchmark
 render name function inputs =
   let noSetup f input = \_ _-> f input
   in  T.Render name <| map (noSetup function) inputs
@@ -63,5 +62,18 @@ assessing page load time.
 
       renderStatic "Markdown rendering" markdownBlock
 -}
-renderStatic : String -> Element -> T.Benchmark
+renderStatic : String -> Element -> Benchmark
 renderStatic name element = render name (\_ -> element) [()]
+
+
+{-| For each benchmark, run it 10 times in a row and average the times. If the
+benchmark needs to render something, it goes to screen. Once the benchmarks are
+completed, the screen will change to display them as a line graph
+    
+    benchmarks = [ render "Blur image" blurPonyPNG [1..50]
+                 , logic  "Compute determinant" [m1, m2, m3, m4]
+                 ]
+    main = run benchmarks
+-}
+run : [Benchmark] -> Signal Element
+run = R.run

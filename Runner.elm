@@ -33,15 +33,6 @@ averageResults results =
     in { name=(head results).name, times=avgs }
 
 
-{-| For each benchmark, run it 10 times in a row and average the times. If the
-benchmark needs to render something, it goes to screen. Once the benchmarks are
-completed, the screen will change to display them as a line graph
-    
-    benchmarks = [ render "Blur image" blurPonyPNG [1..50]
-                 , logic  "Compute determinant" [m1, m2, m3, m4]
-                 ]
-    main = run benchmarks
--}
 run : [Benchmark] -> Signal Element
 run bms =
     let repeatedBms = duplicateEach numRepeats bms

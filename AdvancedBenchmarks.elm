@@ -14,13 +14,14 @@ Benchmarks for more specific purposes where the basic ones will not suffice
 
 import Types as T
 
+-- Bindings from other files for a cleaner export
+type Benchmark = T.Benchmark
 
-{-| Run some function on a list of inputs to setup information for benchmark.
+
+{-| Run a staged benchmark. There is a setup phase and a timed phase.
 This is similar to JSPerf's setup area. You pass in a benchmark name, a function
-that turns initial data into setup data, a function to time, and another
-list of inputs to finish up the timed function. The following rule must hold true:
-      
-      length setupInputs == length inputs
+to time, a function that does untimed work converting seeds to inputs, and a list
+of seeds.
 
 This kind of benchmark may be helpful where the function you want to time requires
 input that itself takes a non-trivial amount of time to compute but doesn't need
@@ -29,19 +30,19 @@ to be included in the benchmark
       let frames = [0..120]
           getFrame index = getFrame (musicStore "Rhapsody in Blue") index
       in  renderWithSetup "Visualize audio frame"
-              getFrame frames visualizeFrame frames
+              visualizeFrame getFrame frames
 
 In this example, you don't care how long it takes to get the frame but you want
 to know how long it takes to visualize the audio frame. So you use a function to
 set things up for the visualizer (i.e., get the song and go to the specific
 frame).
 -}
-renderWithSetup : String -> (a -> b) -> [a] -> (b -> c -> Element) -> [c] -> T.Benchmark
-renderWithSetup name setupFunction setupInputs function inputs =
-  let thunk f (setupFunc,testInput) = \_ -> let input =  setupFunc ()
-                                           in  \_ -> f input testInput
-      setups = inputMap setupFunction setupInputs
-  in  T.Render name <| map (thunk function) <| zip setups inputs
+renderWithSetup : String -> (intput -> Element) -> (seed -> input) -> [seed] -> Benchmark
+renderWithSetup name function seedFunction seeds =
+  let thunk f seededInputFunction = \_ -> let input = seededInputFunction ()
+                                              muted x = always () (f x)
+                                          in  \_ -> muted input
+  in  T.Render name <| map (thunk function) (inputMap seedFunction seeds)
 
 
 
@@ -62,12 +63,12 @@ It would be too much for many browsers to allocate dozens of 10000 element lists
 at the same time, so instead we allocate them when we need them. Garbage collection
 can reclaim the lists once the benchmark is done.
 -}
-logicWithDeferedInput : String -> (a -> b) -> (c -> a) -> [c] -> T.Benchmark
-logicWithDeferedInput name function deferedInput inputs =
-  let thunk f lazyInputFunction = \_ -> let input = lazyInputFunction ()
-                                            muted x = always () (f x)
-                                        in  \_ -> muted input
-  in T.Logic name <| map (thunk function) (inputMap deferedInput inputs)
+logicWithDeferedInput : String -> (input -> output) -> (seed -> input) -> [seed] -> Benchmark
+logicWithDeferedInput name function seedFunction seeds =
+  let thunk f seededInputFunction = \_ -> let input = seededInputFunction ()
+                                              muted x = always () (f x)
+                                          in  \_ -> muted input
+  in T.Logic name <| map (thunk function) (inputMap seedFunction seeds)
 
 
 
@@ -77,5 +78,5 @@ This will come in handy for the logicWithDeferedInput benchmarks.
 
       trials = inputMap (\x -> [1..(1000 * x)]) [1..10]
 -}
-inputMap : (a -> b) -> [a] -> [() -> b]
+inputMap : (seed -> input) -> [seed] -> [() -> input]
 inputMap f xs = map (\x -> \() -> f x) xs
