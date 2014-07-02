@@ -64,8 +64,8 @@ Elm.Native.Runner.make = function(elm) {
     function runMany(benchmarks){
         var bms = ListUtils.toArray(benchmarks);
         var totalBenchmarks = bms.length;
-        var bmIndex   = 0;
-        var index     = 0;
+        var bmIndex = 0;
+        var index = 0;
         var deltas = Signal.constant(-1);
         var w = Dimensions.value._0;
         var h = Dimensions.value._1;
@@ -79,17 +79,16 @@ run. This is a fatal error.");
             return;
         }
         var currentFunctionType = bms[bmIndex].ctor;
-        results[bmIndex] = {_:{}};
-        results[bmIndex].name = bms[bmIndex]._0;
-        results[bmIndex].times = [];
-
+        results[bmIndex] = { _: {}
+                           , name : bms[bmIndex]._0
+                           , times : []
+                           };
         var startTime = now();
 
         // time -> Element -> Element
         function bmStep (deltaObject, _) {
             var doWork = true;
             if(deltaObject.ctor === 'Pure') {
-                // This method fo rounding staves off floating point errors
                 results[bmIndex].times.push(deltaObject.time);
             } else if(deltaObject.ctor === 'Rendering') {
                 results[bmIndex].times.push((now() - deltaObject.time));
@@ -106,9 +105,10 @@ run. This is a fatal error.");
                 }
                 // On to the next round of thunks, do a blank element
                 doWork = false;
-                results.push({_:{}});
-                results[bmIndex].name = bms[bmIndex]._0;
-                results[bmIndex].times = [];
+                results.push({ _:{}
+                             , name : bms[bmIndex]._0
+                             , times : []
+                             });
                 currentFunctions = ListUtils.toArray(bms[bmIndex]._1);
                 currentFunctionType = bms[bmIndex].ctor;
             }
@@ -121,17 +121,26 @@ run. This is a fatal error.");
                        , _0   : emptyElem
                        }
             }
-            if(currentFunctionType === 'Logic') {
-                timeFunction(currentFunctions[index++]);
-                return { ctor : 'Left'
-                       , _0   : emptyElem
-                       }
-            } else if (currentFunctionType === 'Render'){
-                var elem = instrumentedElement(currentFunctions[index++]);
-                return { ctor : 'Left'
-                       , _0   : elem
-                       }
+            var element;
+            switch(currentFunctionType) {
+              case 'Logic':
+                  timeFunction(currentFunctions[index]);
+                  element = emptyElem;
+              break;
+
+              case 'Render':
+                  element = instrumentedElement(currentFunctions[index]);
+              break;
+
+              default:
+                  console.log("The impossible has happened. Please report this bug" +
+                              " to github.com/michaelbjames/elm-benchmark/issues.");
+              break;
             }
+            index++;
+            return { ctor : 'Left'
+                   , _0   : element
+                   }
         }
 
         var bmBaseState;
@@ -168,11 +177,11 @@ run. This is a fatal error.");
 
         function benchRender(thunk) {
             var preparedThunk = thunk(Utils.Tuple0);
-            var t1           = now();
+            var t1 = now();
             var newRendering = Renderer.render(preparedThunk(Utils.Tuple0));
-            var deltaObject  = { ctor: 'Rendering'
-                               , time: t1
-                               };
+            var deltaObject = { ctor: 'Rendering'
+                              , time: t1
+                              };
             setTimeout(function() { elm.notify(deltas.id, deltaObject); }, 0);
             return newRendering
         }
@@ -180,13 +189,13 @@ run. This is a fatal error.");
         function benchUpdate(node, oldThunk, newThunk) {
             var preparedOldThunk = oldThunk(Utils.Tuple0);
             var preparedNewThunk = newThunk(Utils.Tuple0);
-            var t1           = now();
-            var oldModel     = preparedOldThunk(Utils.Tuple0);
-            var newModel     = preparedNewThunk(Utils.Tuple0);
+            var t1 = now();
+            var oldModel = preparedOldThunk(Utils.Tuple0);
+            var newModel = preparedNewThunk(Utils.Tuple0);
             var newRendering = Renderer.update(node, oldModel, newModel);
-            var deltaObject  = { ctor: 'Rendering'
-                               , time: t1
-                               };
+            var deltaObject = { ctor: 'Rendering'
+                              , time: t1
+                              };
             setTimeout(function() { elm.notify(deltas.id, deltaObject); }, 0);
         }
 
