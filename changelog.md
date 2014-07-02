@@ -10,7 +10,8 @@
 #### Breaking Changes
     * `staticRender` is now `renderStatic`
     * No more `logicSetup`
-    * `lazyLogic` is now `logicDeferedInput`
+    * `lazyLogic` is now `logicWithDeferedInput`
+    * `renderSetup` is now `renderWithSetup`
 
 ## 0.2.0
 
