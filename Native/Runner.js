@@ -144,18 +144,27 @@ run. This is a fatal error.");
         }
 
         var bmBaseState;
-        if(currentFunctionType === 'Logic') {
-            bmBaseState = { ctor : 'Left'
-                          , _0   : emptyElem
-                          }
-            setTimeout(function() {
-                elm.notify(deltas.id, -1);
-            },100); // Need time for the fold to get hooked up
-        } else {
-            var elem = instrumentedElement(currentFunctions[index++]);
-            bmBaseState = { ctor : 'Left'
-                          , _0   : elem
-                          }
+        switch(currentFunctionType) {
+            case 'Logic':
+                bmBaseState = { ctor : 'Left'
+                              , _0   : emptyElem
+                              }
+                setTimeout(function() {
+                    elm.notify(deltas.id, -1);
+                },100); // Need time for the fold to get hooked up
+            break;
+
+            case 'Render':
+                var elem = instrumentedElement(currentFunctions[index++]);
+                bmBaseState = { ctor : 'Left'
+                              , _0   : elem
+                              }
+            break;
+
+            default:
+                console.log("The impossible has happened. Please report this bug" +
+                            " to github.com/michaelbjames/elm-benchmark/issues.");
+            break;
         }
         var accumulation = A3( Signal.foldp, F2(bmStep), bmBaseState, deltas);
 
