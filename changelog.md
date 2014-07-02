@@ -1,4 +1,4 @@
-### 0.2.1
+### 0.3.0
 
 #### Notes
     * Elm version requirement version bumped to `0.12.3`

@@ -1,5 +1,5 @@
 {
-  "version" : "0.2.1",
+  "version" : "0.3.0",
   "summary" : "Benchmarking for logic and rendering",
   "description" : "Benchmark your project! This library lets you test the speed of your logic, data structures, and rendering code.",
   "license" : "BSD 3-clause",
