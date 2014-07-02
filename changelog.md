@@ -2,16 +2,17 @@
 
 #### Notes
     * Elm version requirement version bumped to `0.12.3`
-    * We break apart the benchmarks into the basic and advanced ones
+    * We break apart the benchmarks into Benchmarks and Benchmark.DeferredSetup
 
 #### Improvements
     * Better documentation
+    * Easier future additions with a module scheme (Benchmark/etc)
 
 #### Breaking Changes
     * `staticRender` is now `renderStatic`
     * No more `logicSetup`
-    * `lazyLogic` is now `logicWithDeferedInput`
-    * `renderSetup` is now `renderWithSetup`
+    * `lazyLogic` is now `DS.logic`
+    * `renderSetup` is now `DS.render`
     * `renderSetup` is now like `lazyLogic` but for rendering
     * No longer using the Perf namespace
 

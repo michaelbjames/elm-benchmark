@@ -1,7 +1,7 @@
 module Main where
 
 import Benchmark (..)
-import AdvancedBenchmarks (logicWithDeferedInput)
+import Benchmark.DeferredSetup as DS
 import Dict as D
 
 
@@ -22,7 +22,7 @@ insertBench =
     let multiplier = 1000
         trialData x = [1..(multiplier * x)]
         insertWrap kvs =  foldr (\kv d -> D.insert kv kv d) D.empty kvs
-    in  logicWithDeferedInput "insert" insertWrap trialData [1..10]
+    in  DS.logic "insert" insertWrap trialData [1..10]
 
 
 -- Point of discussion: what percent of the dictionary should we update?
@@ -34,7 +34,7 @@ updateBench =
                             Just v -> Just (v + 1)
                             Nothing -> Nothing
         updateWrap dict = foldr (\x d -> D.update x updateFunction d) dict [1..updates]
-    in  logicWithDeferedInput "update" updateWrap D.fromList listDictionary
+    in  DS.logic "update" updateWrap D.fromList listDictionary
 
 
 -- No variable changes between runs. However from initial data, the first couple
@@ -44,7 +44,7 @@ removeBench =
         removes = 200
         listDictionary = map (\_ -> zip [1..dictSize] [1..dictSize]) [1..10]
         removeWrap dict = foldr (\x d-> D.remove x d) dict [1..removes]
-    in  logicWithDeferedInput "remove" removeWrap D.fromList listDictionary
+    in  DS.logic "remove" removeWrap D.fromList listDictionary
 
 
 isMemberBench =
@@ -52,7 +52,7 @@ isMemberBench =
         trials = 50
         listDictionary = dictList multiplier
         isMemberWrap d = map (\x -> D.member x d) [1..trials]
-    in  logicWithDeferedInput "isMember" isMemberWrap D.fromList listDictionary
+    in  DS.logic "isMember" isMemberWrap D.fromList listDictionary
 
 
 isNotMemberBench =
@@ -60,7 +60,7 @@ isNotMemberBench =
         trials = 200
         listDictionary = dictList multiplier
         isNotMemberWrap d = map (\x -> D.member (x-trials) d) [1..trials]
-    in  logicWithDeferedInput "isNotMember" isNotMemberWrap D.fromList listDictionary
+    in  DS.logic "isNotMember" isNotMemberWrap D.fromList listDictionary
 
 
 getBench =
@@ -68,7 +68,7 @@ getBench =
         gets = 500
         listDictionary = dictList multiplier
         getWrap dict = map (\i -> D.get i dict) [1..gets]
-    in  logicWithDeferedInput "get" getWrap D.fromList listDictionary
+    in  DS.logic "get" getWrap D.fromList listDictionary
 
 
 
@@ -85,7 +85,7 @@ noCollisionUnion =
         rightSets = setGenerator oddArray multiplier
         trialData (l,r) = (D.fromList l , D.fromList r)
         unionWrap (l,r) = D.union l r
-    in  logicWithDeferedInput "noCollisionUnion" unionWrap trialData (zip leftSets rightSets)
+    in  DS.logic "noCollisionUnion" unionWrap trialData (zip leftSets rightSets)
 
 
 halfCollisionUnion =
@@ -96,7 +96,7 @@ halfCollisionUnion =
         rightSets = setGenerator times4 multiplier
         trialData (l,r) = (D.fromList l , D.fromList r)
         unionWrap (l,r) = D.union l r
-    in  logicWithDeferedInput "halfCollisionUnion" unionWrap trialData (zip leftSets rightSets)
+    in  DS.logic "halfCollisionUnion" unionWrap trialData (zip leftSets rightSets)
 
 
 noCollisionIntersect =
@@ -107,7 +107,7 @@ noCollisionIntersect =
         rightSets = setGenerator oddArray multiplier
         trialData (l,r) = (D.fromList l , D.fromList r)
         intersectWrap (l,r) = D.intersect l r
-    in  logicWithDeferedInput "noCollisionIntersect" intersectWrap trialData (zip leftSets rightSets)
+    in  DS.logic "noCollisionIntersect" intersectWrap trialData (zip leftSets rightSets)
 
 
 halfCollisionIntersect =
@@ -118,7 +118,7 @@ halfCollisionIntersect =
         rightSets = setGenerator times4 multiplier
         trialData (l,r) = (D.fromList l , D.fromList r)
         intersectWrap (l,r) = D.intersect l r
-    in  logicWithDeferedInput "halfCollisionIntersect" intersectWrap trialData (zip leftSets rightSets)
+    in  DS.logic "halfCollisionIntersect" intersectWrap trialData (zip leftSets rightSets)
 
 
 noCollisionDiff =
@@ -129,7 +129,7 @@ noCollisionDiff =
         rightSets = setGenerator oddArray multiplier
         trialData (l,r) = (D.fromList l , D.fromList r)
         diffWrap (l,r) = D.diff l r
-    in  logicWithDeferedInput "noCollisionDiff" diffWrap trialData (zip leftSets rightSets)
+    in  DS.logic "noCollisionDiff" diffWrap trialData (zip leftSets rightSets)
 
 
 halfCollisionDiff =
@@ -140,7 +140,7 @@ halfCollisionDiff =
         rightSets = setGenerator times4 multiplier
         trialData (l,r) = (D.fromList l , D.fromList r)
         diffWrap (l,r) = D.diff l r
-    in  logicWithDeferedInput "halfCollisionDiff" diffWrap trialData (zip leftSets rightSets)
+    in  DS.logic "halfCollisionDiff" diffWrap trialData (zip leftSets rightSets)
 
 
 
@@ -152,28 +152,28 @@ keysBench =
     let multiplier = 1000
         listDictionary = dictList multiplier
         keysWrap d = D.keys d
-    in  logicWithDeferedInput "keys" keysWrap D.fromList listDictionary
+    in  DS.logic "keys" keysWrap D.fromList listDictionary
 
 
 valuesBench =
     let multiplier = 1000
         listDictionary = dictList multiplier
         valuesWrap d = D.values d
-    in  logicWithDeferedInput "values" valuesWrap D.fromList listDictionary
+    in  DS.logic "values" valuesWrap D.fromList listDictionary
 
 
 toListBench =
     let multiplier = 1000
         listDictionary = dictList multiplier
         toListWrap d = D.toList d
-    in  logicWithDeferedInput "toList" toListWrap D.fromList listDictionary
+    in  DS.logic "toList" toListWrap D.fromList listDictionary
 
 
 fromListBench =
     let multiplier = 1000
         trialData x = zip [1..(multiplier * x)] [1..(multiplier * x)]
         fromListWrap xs = D.fromList xs
-    in  logicWithDeferedInput "fromList" fromListWrap trialData [1..10]
+    in  DS.logic "fromList" fromListWrap trialData [1..10]
 
 
 
@@ -185,7 +185,7 @@ mapBench =
     let multiplier = 1000
         listDictionary = dictList multiplier
         mapWrap xs = D.map id xs
-    in logicWithDeferedInput "map" mapWrap D.fromList listDictionary
+    in DS.logic "map" mapWrap D.fromList listDictionary
 
 
 

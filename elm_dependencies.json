@@ -6,7 +6,7 @@
   "repository" : "https://github.com/michaelbjames/elm-benchmark.git",
   "exposed-modules" :
     [ "Benchmark"
-    , "AdvancedBenchmarks"
+    , "Benchmark.DeferredSetup"
     ],
   "native-modules" :
     [ "Native.Runner"

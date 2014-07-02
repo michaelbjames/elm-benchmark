@@ -1,15 +1,15 @@
-module AdvancedBenchmarks
-    ( renderWithSetup
-    , logicWithDeferedInput
+module Benchmark.DeferredSetup
+    ( render
+    , logic
     ) where
 {-|
 Benchmarks for more specific purposes where the basic ones will not suffice
 
 # Memory-smart logic function
-@docs logicWithDeferedInput
+@docs logic
 
 # Benchmark with setup
-@docs renderWithSetup
+@docs render
 -}
 
 import Types as T
@@ -29,7 +29,7 @@ to be included in the benchmark
 
       let frames = [0..120]
           getFrame index = getFrame (musicStore "Rhapsody in Blue") index
-      in  renderWithSetup "Visualize audio frame"
+      in  render "Visualize audio frame"
               visualizeFrame getFrame frames
 
 In this example, you don't care how long it takes to get the frame but you want
@@ -37,11 +37,10 @@ to know how long it takes to visualize the audio frame. So you use a function to
 set things up for the visualizer (i.e., get the song and go to the specific
 frame).
 -}
-renderWithSetup : String -> (intput -> Element) -> (seed -> input) -> [seed] -> Benchmark
-renderWithSetup name function seedFunction seeds =
+render : String -> (input -> Element) -> (seed -> input) -> [seed] -> Benchmark
+render name function seedFunction seeds =
   let thunk f seededInputFunction = \_ -> let input = seededInputFunction ()
-                                              muted x = always () (f x)
-                                          in  \_ -> muted input
+                                          in  \_ -> f input
   in  T.Render name <| map (thunk function) (inputMap seedFunction seeds)
 
 
@@ -56,15 +55,15 @@ that sets up your input, and your input.
           let multiplier = 1000
               inputToLongList x = [1..(multiplier * x)]
               insertToDictionary = foldr (\value d -> Dict.insert value value d) D.empty
-          in  logicWithDeferedInput "Insert 1000 up to 10000 elements into an empty dictionary"
+          in  logic "Insert 1000 up to 10000 elements into an empty dictionary"
                   insertToDictionary inputToLongList [1..10]
 
 It would be too much for many browsers to allocate dozens of 10000 element lists
 at the same time, so instead we allocate them when we need them. Garbage collection
 can reclaim the lists once the benchmark is done.
 -}
-logicWithDeferedInput : String -> (input -> output) -> (seed -> input) -> [seed] -> Benchmark
-logicWithDeferedInput name function seedFunction seeds =
+logic : String -> (input -> output) -> (seed -> input) -> [seed] -> Benchmark
+logic name function seedFunction seeds =
   let thunk f seededInputFunction = \_ -> let input = seededInputFunction ()
                                               muted x = always () (f x)
                                           in  \_ -> muted input
@@ -74,7 +73,7 @@ logicWithDeferedInput name function seedFunction seeds =
 
 
 {-| Internal function to create turnkey functions from a function and presaturations.
-This will come in handy for the logicWithDeferedInput benchmarks.
+This will come in handy for the DS.logic benchmarks.
 
       trials = inputMap (\x -> [1..(1000 * x)]) [1..10]
 -}
