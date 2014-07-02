@@ -13,6 +13,8 @@
     * `lazyLogic` is now `logicWithDeferedInput`
     * `renderSetup` is now `renderWithSetup`
 
+
+
 ## 0.2.0
 
 #### Improvements
