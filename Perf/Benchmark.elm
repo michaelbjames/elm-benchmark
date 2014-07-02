@@ -10,6 +10,9 @@ Simple Benchmarking library
 # Basic Benchmarks
 @docs logic, render, renderStatic
 
+# Run the benchmark
+@docs run
+
 -}
 
 import Perf.Types as T
