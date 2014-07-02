@@ -139,9 +139,6 @@ Elm.Native.Runner.make = function(elm) {
             bmBaseState = { ctor : 'Left'
                           , _0   : emptyElem
                           }
-            setTimeout(function() {
-                elm.notify(deltas.id, -1);
-            },100); // Need time for the fold to get hooked up
         } else { // Render
             var elem = instrumentedElement(currentFunctions[index++]);
             bmBaseState = { ctor : 'Left'
@@ -149,6 +146,11 @@ Elm.Native.Runner.make = function(elm) {
                           }
         }
         var accumulation = A3( Signal.foldp, F2(bmStep), bmBaseState, deltas);
+        if (currentFunctionType === 'Logic') {
+            setTimeout(function() {
+                elm.notify(deltas.id, -1);
+            },0);
+        }
 
 
         // type Model = { thunk : () -> Element, cachedElement : Element }
