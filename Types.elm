@@ -1,4 +1,4 @@
-module Perf.Types where
+module Types where
 
 type Result = { name:String, times:[Time] }
 

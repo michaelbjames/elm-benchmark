@@ -5,11 +5,11 @@
   "license" : "BSD 3-clause",
   "repository" : "https://github.com/michaelbjames/elm-benchmark.git",
   "exposed-modules" :
-    [ "Perf.Benchmark"
-    , "Perf.AdvancedBenchmarks"
+    [ "Benchmark"
+    , "AdvancedBenchmarks"
     ],
   "native-modules" :
-    [ "Perf.Native.Runner"
+    [ "Native.Runner"
     ],
   "elm-version" : "0.12.3",
   "dependencies" : {}

@@ -1,4 +1,4 @@
-module Perf.Benchmark 
+module Benchmark 
     ( logic
     , render
     , renderStatic
@@ -15,8 +15,8 @@ Simple Benchmarking library
 
 -}
 
-import Perf.Types as T
-import Perf.Runner as R
+import Types as T
+import Runner as R
 
 -- Bindings from other files for a cleaner export
 type Benchmark = T.Benchmark

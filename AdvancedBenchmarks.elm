@@ -1,4 +1,4 @@
-module Perf.AdvancedBenchmarks
+module AdvancedBenchmarks
     ( renderWithSetup
     , logicWithDeferedInput
     ) where
@@ -12,7 +12,7 @@ Benchmarks for more specific purposes where the basic ones will not suffice
 @docs renderWithSetup
 -}
 
-import Perf.Types as T
+import Types as T
 
 
 {-| Run some function on a list of inputs to setup information for benchmark.

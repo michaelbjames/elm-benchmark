@@ -1,6 +1,6 @@
-module Perf.LineGraph (showResults) where
+module LineGraph (showResults) where
 
-import Perf.Types (..)
+import Types (..)
 
 type Coordinate = { x:Float, y:Float }
 

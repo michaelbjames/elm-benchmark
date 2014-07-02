@@ -1,12 +1,12 @@
-module Perf.Runner
+module Runner
     ( run
     ) where
 
-import Perf.Types (..)
+import Types (..)
 import Native.Runner
 import Either (..)
 import Window
-import Perf.LineGraph (..)
+import LineGraph (..)
 
 numRepeats = 10
 

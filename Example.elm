@@ -1,6 +1,6 @@
 module Main where
 
-import Perf.Benchmark (..)
+import Benchmark (..)
 
 slowFib : Int -> Int
 slowFib n =  case n of
