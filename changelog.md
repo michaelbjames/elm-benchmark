@@ -12,6 +12,8 @@
     * No more `logicSetup`
     * `lazyLogic` is now `logicWithDeferedInput`
     * `renderSetup` is now `renderWithSetup`
+    * `renderSetup` is now like `lazyLogic` but for rendering
+    * No longer using the Perf namespace
 
 
 
