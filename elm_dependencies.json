@@ -1,12 +1,12 @@
 {
-  "version" : "0.2.0",
+  "version" : "0.2.1",
   "summary" : "Benchmarking for logic and rendering",
   "description" : "Benchmark your project! This library lets you test the speed of your logic, data structures, and rendering code.",
   "license" : "BSD 3-clause",
   "repository" : "https://github.com/michaelbjames/elm-benchmark.git",
   "exposed-modules" :
     [ "Perf.Benchmark"
-    , "Perf.Runner"
+    , "Perf.AdvancedBenchmarks"
     ],
   "native-modules" :
     [ "Perf.Native.Runner"

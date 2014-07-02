@@ -18,19 +18,12 @@ renderMark : Benchmark
 renderMark = render "Circle" (circleWrapper red) [10..49]
 
 staticMark : Benchmark
-staticMark = staticRender "Blue Circle" (circleWrapper blue 100)
-
-logicalSetup : Benchmark
-logicalSetup =
-    let setup x = [1..(1000 * x)]
-        trials = reverse [1..10]
-    in  logicSetup "add 10..1 to (1000 * [1..10])" setup [1..10] (flip (::)) trials
+staticMark = renderStatic "Blue Circle" (circleWrapper blue 100)
 
 groupMark : [Benchmark]
 groupMark = [ staticMark
             , fibMark
             , renderMark
-            , logicalSetup
             ]
 
 main : Signal Element
