@@ -1,7 +1,7 @@
 module Main where
 
-import Perf.Benchmark (..)
-import Perf.AdvancedBenchmarks (logicWithDeferedInput)
+import Benchmark (..)
+import AdvancedBenchmarks (logicWithDeferedInput)
 import Dict as D
 
 

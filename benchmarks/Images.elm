@@ -1,6 +1,6 @@
 module Main where
 
-import Perf.Benchmark (..)
+import Benchmark (..)
 
 imagePaths : [String]
 imagePaths = map (\x -> "images/" ++ show x ++ ".jpg") [1..12]

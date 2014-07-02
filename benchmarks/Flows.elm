@@ -1,6 +1,6 @@
 module Main where
 
-import Perf.Benchmark (..)
+import Benchmark (..)
 
 
 imagePaths : [String]
