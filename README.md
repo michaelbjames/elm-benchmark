@@ -6,7 +6,7 @@ Elm code benchmarking suite
 ###How to use this library:
 First: import what you'll need
 ```haskell
-import Perf.Benchmark (..)
+import Benchmark (..)
 ```
 
 Now a simple rendering benchmarck. How long does it take to render circles of different sizes?
@@ -52,6 +52,6 @@ but you may be bounded by memory issues or have some initial setup that shouldn'
 be timed.
 You'll need to import the advanced library:
 ```haskell
-import Perf.AdvancedBenchmarks (..)
+import Benchmark.DeferredSetup as DS
 ```
-Read about `logicDeferedInput` and `renderSetup` in their file.
+Read about more complex `logic` and `render` functions in their file.
