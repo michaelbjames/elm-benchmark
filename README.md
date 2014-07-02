@@ -6,9 +6,7 @@ Elm code benchmarking suite
 ###How to use this library:
 First: import what you'll need
 ```haskell
-import Perf.Runner (..)
 import Perf.Benchmark (..)
-import Perf.Types (..)
 ```
 
 Now a simple rendering benchmarck. How long does it take to render circles of different sizes?
@@ -48,32 +46,12 @@ main = run benchmarks
 
 The screen will change before you to display the results when all benchmarks are completed.
 
-####A little more advanced
-Let's suppose you've got a **huge** logical test. You're testing something that happens so fast on small input most timers wouldn't catch it so you instead run it on a 1,000,000 element list. This is too much memory to just allocate at the start and hold on to until it is no longer needed. We can lazily allocate the input for the test when it is needed.
+####Need more power?
+Look to the advanced benchmarks. For most cases, the basic benchmarks should suffice
+but you may be bounded by memory issues or have some initial setup that shouldn't
+be timed.
+You'll need to import the advanced library:
 ```haskell
-emptyArray =
-    let multiplier = 100000
-        trials : [() -> Int]
-        trials x = multiplier * x
-        -- We just need to make the arrays, not keep them
-        manyEmpty : Int -> Array
-        manyEmpty i = foldr (\_ _ -> Array.empty) Array.empty [1..i]
-    in  lazyLogic "[1..10] * 100000 empty arrays" manyEmpty trials [1..10]
+import Perf.AdvancedBenchmarks (..)
 ```
-`lazyLogic` here is of type `String -> (a -> b) -> (c -> a) -> [c] -> Benchmark`
-
-
-We can also run setup in a different way that is more similar to JSPerf's setup phase:
-```haskell
-logicalSetup : Benchmark
-logicalSetup =
-    let setup = inputMap (\x -> [1.. (1000 * x)]) [1..10]
-        trials = reverse [1..10]
-        appender xs x = x :: xs
-    in  logicSetup "add 10..1 to (1000 * [1..10])" setup appender trials
-```
-Note that logicSetup is of type `String -> (a -> b) -> [a] -> (b -> c -> d) -> [c] -> Benchmark`.
-This works in the same way for rendering, too!
-```haskell
-renderSetup : String -> (a -> b) -> [a] -> (b -> c -> Element) -> [c] -> Benchmark
-```
+Read about `logicDeferedInput` and `renderSetup` in their file.
