@@ -5,30 +5,37 @@ Elm.Native.Runner.make = function(elm) {
     elm.Native.Runner = elm.Native.Runner || {};
     if (elm.Native.Runner.values) return elm.Native.Runner.values;
 
+
+    // Returns the number of milliseconds elapsed since either the browser navigationStart event or
+    // the UNIX epoch, depending on availability.
+    // Where the browser supports 'performance' we use that as it is more accurate (microsoeconds
+    // will be returned in the fractional part) and more reliable as it does not rely on the system time.
+    // Where 'performance' is not available, we will fall back to Date().getTime().
+    // http://dvolvr.davidwaterston.com/2012/06/24/javascript-accurate-timing-is-almost-here/        
+    var performance = window.performance || {};      
+    performance.now = (function() {
+        return performance.now    ||
+        performance.webkitNow     ||
+        performance.msNow         ||
+        performance.oNow          ||
+        performance.mozNow        ||
+        function() { return new Date().getTime(); };
+    })();
+
     var Signal     = Elm.Signal.make(elm);
     var Utils      = Elm.Native.Utils.make(elm);
     var ListUtils  = Elm.Native.List.make(elm);
     var Element    = Elm.Graphics.Element.make(elm);
     var Renderer   = ElmRuntime.Render.Element();
     var Dimensions = Elm.Native.Window.make(elm).dimensions;
-    var now        = (function() {
-        // Returns the number of milliseconds elapsed since either the browser navigationStart event or
-        // the UNIX epoch, depending on availability.
-        // Where the browser supports 'performance' we use that as it is more accurate (microsoeconds
-        // will be returned in the fractional part) and more reliable as it does not rely on the system time.
-        // Where 'performance' is not available, we will fall back to Date().getTime().
-        // http://dvolvr.davidwaterston.com/2012/06/24/javascript-accurate-timing-is-almost-here/        
-        var performance = window.performance || {};      
-        performance.now = (function() {
-            return performance.now    ||
-            performance.webkitNow     ||
-            performance.msNow         ||
-            performance.oNow          ||
-            performance.mozNow        ||
-            function() { return new Date().getTime(); };
-        })();
-        return Math.round(performance.now()*10);
-    }); 
+    var now        = function() {
+        // We get too many digits from accurate clocks. We only want one
+        // extra digit. So we must multiply by 10, round, and divide again;
+        // however, pesky floating point errors can occasionally cause the
+        // numbers to be off by ±1x10e-6 so we coerce to an int after rounding
+        return (Math.round(performance.now()*10)|0)/10;
+    };
+
 
     /* runMany : [Benchmark] -> Signal Either Element Time
      |
@@ -83,16 +90,16 @@ run. This is a fatal error.");
             var doWork = true;
             if(deltaObject.ctor === 'Pure') {
                 // This method fo rounding staves off floating point errors
-                results[bmIndex].times.push(deltaObject.time / 10);
+                results[bmIndex].times.push(deltaObject.time);
             } else if(deltaObject.ctor === 'Rendering') {
-                results[bmIndex].times.push((now() - deltaObject.time) / 10);
+                results[bmIndex].times.push((now() - deltaObject.time));
             }
             if(index >= currentFunctions.length) {
                 results[bmIndex].times = ListUtils.fromArray(results[bmIndex].times);
                 index = 0;
                 bmIndex++;
                 if(bmIndex >= totalBenchmarks) {
-                    console.log((now() - startTime)/10);
+                    console.log((now() - startTime));
                     return { ctor : 'Right'
                            , _0   : ListUtils.fromArray(results)
                            }
