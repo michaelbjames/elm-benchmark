@@ -2,6 +2,7 @@ module Benchmark
     ( logic
     , render
     , renderStatic
+    , suite
     , run
     ) where
 {-| 
@@ -64,6 +65,10 @@ assessing page load time.
 -}
 renderStatic : String -> Element -> Benchmark
 renderStatic name element = render name (\_ -> element) [()]
+
+
+suite : String -> [Benchmark] -> Benchmark
+suite = T.Suite
 
 
 {-| For each benchmark, run it 10 times in a row and average the times. If the

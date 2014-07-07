@@ -11,6 +11,22 @@ import Window
 
 numRepeats = 10
 
+flatten : Benchmark -> [Benchmark]
+flatten bm = case bm of 
+    Suite name benchmarks -> benchmarks
+    _ -> [bm]
+
+applyStructure : [Result] -> [Benchmark] -> [Group Result]
+applyStructure results bms = case bms of
+    Suite name benchmarks :: rest ->
+        let suiteSize = length benchmarks
+            rHead = take suiteSize results
+            rTail = drop suiteSize results
+        in  Set name (applyStructure rHead benchmarks) :: applyStructure rTail rest
+    Logic _ _ :: rest -> Single (head results) :: applyStructure (tail results) rest 
+    Render _ _ :: rest -> Single (head results) :: applyStructure (tail results) rest
+    [] -> [] 
+
 duplicateEach : Int -> [a] -> [a]
 duplicateEach n xs = foldr (++) [] <| map (repeat n) xs
 
@@ -36,13 +52,15 @@ averageResults results =
 
 run : [Benchmark] -> Signal Element
 run bms =
-    let repeatedBms = duplicateEach numRepeats bms
-    in  lift2 display Window.width <| Native.Runner.runMany repeatedBms
+    let flattenedBenchmarks = foldr (++) [] <| map flatten bms
+        repeatedBms = duplicateEach numRepeats flattenedBenchmarks
+    in  lift2 (display bms) Window.width <| Native.Runner.runMany repeatedBms
 
 
-display : Int -> Either Element [Result] -> Element
-display w elementString = case elementString of
+display : [Benchmark] -> Int -> Either Element [Result] -> Element
+display structure w elementString = case elementString of
     Left element  -> element
     Right results -> 
         let avgs = condenseEach numRepeats averageResults results
+            structuredResults = applyStructure results structure
         in  showResults w avgs

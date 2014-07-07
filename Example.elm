@@ -32,8 +32,9 @@ staticMark = renderStatic "Blue Circle, radius 100" (circleWrapper blue 100)
 groupMark : [Benchmark]
 groupMark = [ staticMark
             , renderMark
-            , slowFibonacci
-            , fastFibonacci
+            , suite "Fibonacci" [ slowFibonacci
+                                , fastFibonacci
+                                ]
             ]
 
 main : Signal Element
