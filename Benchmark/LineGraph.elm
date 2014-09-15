@@ -22,7 +22,7 @@ graphResult w result =
         scaleResults : [Time] -> [Float]
         scaleResults times =
             let maxTime = maximum times
-                factor = dims.height / maxTime
+                factor = if maxTime == 0 then 0 else dims.height / maxTime
                 adjust y = (y * factor) + margin.bottom
             in  map adjust times
 
