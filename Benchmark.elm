@@ -3,6 +3,7 @@ module Benchmark
     , render
     , renderStatic
     , run
+    , Benchmark
     ) where
 {-| 
 Simple Benchmarking library
